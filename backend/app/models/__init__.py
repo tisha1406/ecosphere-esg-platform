@@ -3,6 +3,7 @@ from app.models.base import AuditMixin
 from app.models.user import User, UserRole
 from app.models.settings import CompanySetting
 from app.models.scoring import PointsLedger, EsgScoreSummary
+from app.models.gamification import Badge
 
 from app.models.environmental import (
     Company,
@@ -39,6 +40,7 @@ __all__ = [
     "CompanySetting",
     "PointsLedger",
     "EsgScoreSummary",
+    "Badge",
     "Company",
     "Facility",
     "CarbonEmission",
