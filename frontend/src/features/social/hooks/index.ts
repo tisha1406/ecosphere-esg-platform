@@ -2,18 +2,21 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { socialApi } from "../api";
 import { WellbeingFormValues, CsrFormValues, DiversityFormValues } from "../schema";
+import { demoSocial, makeListResponse } from "../../demo/demoData";
 
 // ── Wellbeing ──────────────────────────────────────────────
 export const useWellbeingQuery = (params?: any) =>
   useQuery({
     queryKey: ["wellbeing", params],
-    queryFn: () => socialApi.getWellbeing(params),
+    queryFn: async () => makeListResponse(demoSocial.wellbeing, params),
+    initialData: makeListResponse(demoSocial.wellbeing, params),
+    staleTime: Infinity,
   });
 
 export const useCreateWellbeingMutation = () => {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (data: WellbeingFormValues) => socialApi.createWellbeing(data),
+    mutationFn: async (_data: WellbeingFormValues) => ({ ok: true }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["wellbeing"] });
       qc.invalidateQueries({ queryKey: ["socialScore"] });
@@ -26,8 +29,7 @@ export const useCreateWellbeingMutation = () => {
 export const useUpdateWellbeingMutation = () => {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: Partial<WellbeingFormValues> }) =>
-      socialApi.updateWellbeing(id, data),
+    mutationFn: async (_payload: { id: string; data: Partial<WellbeingFormValues> }) => ({ ok: true }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["wellbeing"] });
       qc.invalidateQueries({ queryKey: ["socialScore"] });
@@ -40,7 +42,7 @@ export const useUpdateWellbeingMutation = () => {
 export const useDeleteWellbeingMutation = () => {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (id: string) => socialApi.deleteWellbeing(id),
+    mutationFn: async (_id: string) => ({ ok: true }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["wellbeing"] });
       qc.invalidateQueries({ queryKey: ["socialScore"] });
@@ -54,13 +56,15 @@ export const useDeleteWellbeingMutation = () => {
 export const useCsrQuery = (params?: any) =>
   useQuery({
     queryKey: ["csr", params],
-    queryFn: () => socialApi.getCsrInitiatives(params),
+    queryFn: async () => makeListResponse(demoSocial.csr, params),
+    initialData: makeListResponse(demoSocial.csr, params),
+    staleTime: Infinity,
   });
 
 export const useCreateCsrMutation = () => {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (data: CsrFormValues) => socialApi.createCsrInitiative(data),
+    mutationFn: async (_data: CsrFormValues) => ({ ok: true }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["csr"] });
       qc.invalidateQueries({ queryKey: ["socialScore"] });
@@ -73,8 +77,7 @@ export const useCreateCsrMutation = () => {
 export const useUpdateCsrMutation = () => {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: Partial<CsrFormValues> }) =>
-      socialApi.updateCsrInitiative(id, data),
+    mutationFn: async (_payload: { id: string; data: Partial<CsrFormValues> }) => ({ ok: true }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["csr"] });
       qc.invalidateQueries({ queryKey: ["socialScore"] });
@@ -87,7 +90,7 @@ export const useUpdateCsrMutation = () => {
 export const useDeleteCsrMutation = () => {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (id: string) => socialApi.deleteCsrInitiative(id),
+    mutationFn: async (_id: string) => ({ ok: true }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["csr"] });
       qc.invalidateQueries({ queryKey: ["socialScore"] });
@@ -101,13 +104,15 @@ export const useDeleteCsrMutation = () => {
 export const useDiversityQuery = (params?: any) =>
   useQuery({
     queryKey: ["diversity", params],
-    queryFn: () => socialApi.getDiversityMetrics(params),
+    queryFn: async () => makeListResponse(demoSocial.diversity, params),
+    initialData: makeListResponse(demoSocial.diversity, params),
+    staleTime: Infinity,
   });
 
 export const useCreateDiversityMutation = () => {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (data: DiversityFormValues) => socialApi.createDiversityMetric(data),
+    mutationFn: async (_data: DiversityFormValues) => ({ ok: true }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["diversity"] });
       qc.invalidateQueries({ queryKey: ["socialScore"] });
@@ -120,8 +125,7 @@ export const useCreateDiversityMutation = () => {
 export const useUpdateDiversityMutation = () => {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: Partial<DiversityFormValues> }) =>
-      socialApi.updateDiversityMetric(id, data),
+    mutationFn: async (_payload: { id: string; data: Partial<DiversityFormValues> }) => ({ ok: true }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["diversity"] });
       qc.invalidateQueries({ queryKey: ["socialScore"] });
@@ -134,7 +138,7 @@ export const useUpdateDiversityMutation = () => {
 export const useDeleteDiversityMutation = () => {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (id: string) => socialApi.deleteDiversityMetric(id),
+    mutationFn: async (_id: string) => ({ ok: true }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["diversity"] });
       qc.invalidateQueries({ queryKey: ["socialScore"] });
@@ -150,6 +154,8 @@ export const useSocialScoreQuery = (
 ) =>
   useQuery({
     queryKey: ["socialScore", params],
-    queryFn: () => socialApi.getSocialScore(params),
+    queryFn: async () => ({ data: demoSocial.score }),
+    initialData: { data: demoSocial.score },
+    staleTime: Infinity,
     enabled: !!params.company_id && !!params.start_date && !!params.end_date,
   });

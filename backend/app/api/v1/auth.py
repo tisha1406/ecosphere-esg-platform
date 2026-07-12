@@ -21,12 +21,12 @@ from app.schemas.common import ResponseEnvelope
 router = APIRouter(prefix="/api/v1/auth", tags=["Auth"])
 
 
-def _refresh_cookie_kwargs(max_age_seconds: int) -> dict:
+def _refresh_cookie_kwargs(max_age_seconds: int, secure: bool) -> dict:
     """Return common secure-cookie kwargs for the refresh token."""
     return dict(
         key="refresh_token",
         httponly=True,
-        secure=True,
+        secure=secure,
         samesite="strict",
         max_age=max_age_seconds,
     )
@@ -102,7 +102,10 @@ async def login(
     remember_me_days = 30 if credentials.remember_me else 7
     max_age = remember_me_days * 24 * 60 * 60
 
-    response.set_cookie(value=refresh_token, **_refresh_cookie_kwargs(max_age))
+    response.set_cookie(
+        value=refresh_token,
+        **_refresh_cookie_kwargs(max_age, secure=request.url.scheme == "https")
+    )
 
     return ResponseEnvelope(
         success=True,
@@ -175,7 +178,10 @@ async def refresh(
     # Preserve the original cookie lifetime by reading remaining expiry from payload
     exp = payload.get("exp", 0)
     remaining = max(0, int(exp - datetime.now(timezone.utc).timestamp()))
-    response.set_cookie(value=new_refresh_token, **_refresh_cookie_kwargs(remaining))
+    response.set_cookie(
+        value=new_refresh_token,
+        **_refresh_cookie_kwargs(remaining, secure=request.url.scheme == "https")
+    )
 
     return ResponseEnvelope(
         success=True,

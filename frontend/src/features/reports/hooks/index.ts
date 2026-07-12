@@ -1,19 +1,23 @@
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { reportsApi, ConsolidatedReport } from "../api";
 import { toast } from "sonner";
+import { demoReports } from "../../demo/demoData";
 
 export const useConsolidatedReportQuery = (params: { company_id: string; period: string }) => {
   return useQuery<ConsolidatedReport, Error>({
     queryKey: ["consolidatedReport", params],
-    queryFn: () => reportsApi.getConsolidatedReport(params),
+    queryFn: async () => demoReports,
+    initialData: demoReports,
+    staleTime: Infinity,
     enabled: !!params.company_id && !!params.period,
   });
 };
 
 export const useExportReportMutation = () => {
   return useMutation({
-    mutationFn: (data: { format: "pdf" | "xlsx"; company_id: string; period: string }) => {
-      return reportsApi.exportReport(data);
+    mutationFn: async (data: { format: "pdf" | "xlsx"; company_id: string; period: string }) => {
+      const text = `EcoSphere demo report for ${data.period}`;
+      return new Blob([text], { type: data.format === "pdf" ? "application/pdf" : "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
     },
     onSuccess: (blob, variables) => {
       const url = window.URL.createObjectURL(blob);

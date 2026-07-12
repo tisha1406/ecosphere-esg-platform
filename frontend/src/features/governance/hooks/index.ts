@@ -2,18 +2,21 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { governanceApi } from "../api";
 import { PolicyFormValues, AuditFormValues, BoardActivityFormValues } from "../schema";
+import { demoGovernance, makeListResponse } from "../../demo/demoData";
 
 export const usePoliciesQuery = (params?: any) => {
   return useQuery({
     queryKey: ["policies", params],
-    queryFn: () => governanceApi.getPolicies(params),
+    queryFn: async () => makeListResponse(demoGovernance.policies, params),
+    initialData: makeListResponse(demoGovernance.policies, params),
+    staleTime: Infinity,
   });
 };
 
 export const useCreatePolicyMutation = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (data: PolicyFormValues) => governanceApi.createPolicy(data),
+    mutationFn: async (_data: PolicyFormValues) => ({ ok: true }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["policies"] });
       queryClient.invalidateQueries({ queryKey: ["governanceScore"] });
@@ -28,7 +31,7 @@ export const useCreatePolicyMutation = () => {
 export const useUpdatePolicyMutation = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: Partial<PolicyFormValues> }) => governanceApi.updatePolicy(id, data),
+    mutationFn: async (_payload: { id: string; data: Partial<PolicyFormValues> }) => ({ ok: true }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["policies"] });
       queryClient.invalidateQueries({ queryKey: ["governanceScore"] });
@@ -43,7 +46,7 @@ export const useUpdatePolicyMutation = () => {
 export const useDeletePolicyMutation = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (id: string) => governanceApi.deletePolicy(id),
+    mutationFn: async (_id: string) => ({ ok: true }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["policies"] });
       queryClient.invalidateQueries({ queryKey: ["governanceScore"] });
@@ -58,14 +61,16 @@ export const useDeletePolicyMutation = () => {
 export const useAuditsQuery = (params?: any) => {
   return useQuery({
     queryKey: ["audits", params],
-    queryFn: () => governanceApi.getAudits(params),
+    queryFn: async () => makeListResponse(demoGovernance.audits, params),
+    initialData: makeListResponse(demoGovernance.audits, params),
+    staleTime: Infinity,
   });
 };
 
 export const useCreateAuditMutation = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (data: AuditFormValues) => governanceApi.createAudit(data),
+    mutationFn: async (_data: AuditFormValues) => ({ ok: true }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["audits"] });
       queryClient.invalidateQueries({ queryKey: ["governanceScore"] });
@@ -80,7 +85,7 @@ export const useCreateAuditMutation = () => {
 export const useUpdateAuditMutation = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: Partial<AuditFormValues> }) => governanceApi.updateAudit(id, data),
+    mutationFn: async (_payload: { id: string; data: Partial<AuditFormValues> }) => ({ ok: true }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["audits"] });
       queryClient.invalidateQueries({ queryKey: ["governanceScore"] });
@@ -95,7 +100,7 @@ export const useUpdateAuditMutation = () => {
 export const useDeleteAuditMutation = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (id: string) => governanceApi.deleteAudit(id),
+    mutationFn: async (_id: string) => ({ ok: true }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["audits"] });
       queryClient.invalidateQueries({ queryKey: ["governanceScore"] });
@@ -110,14 +115,16 @@ export const useDeleteAuditMutation = () => {
 export const useBoardActivityQuery = (params?: any) => {
   return useQuery({
     queryKey: ["boardActivity", params],
-    queryFn: () => governanceApi.getBoardActivities(params),
+    queryFn: async () => makeListResponse(demoGovernance.boardActivity, params),
+    initialData: makeListResponse(demoGovernance.boardActivity, params),
+    staleTime: Infinity,
   });
 };
 
 export const useCreateBoardActivityMutation = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (data: BoardActivityFormValues) => governanceApi.createBoardActivity(data),
+    mutationFn: async (_data: BoardActivityFormValues) => ({ ok: true }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["boardActivity"] });
       queryClient.invalidateQueries({ queryKey: ["governanceScore"] });
@@ -132,7 +139,7 @@ export const useCreateBoardActivityMutation = () => {
 export const useUpdateBoardActivityMutation = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: Partial<BoardActivityFormValues> }) => governanceApi.updateBoardActivity(id, data),
+    mutationFn: async (_payload: { id: string; data: Partial<BoardActivityFormValues> }) => ({ ok: true }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["boardActivity"] });
       queryClient.invalidateQueries({ queryKey: ["governanceScore"] });
@@ -147,7 +154,7 @@ export const useUpdateBoardActivityMutation = () => {
 export const useDeleteBoardActivityMutation = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (id: string) => governanceApi.deleteBoardActivity(id),
+    mutationFn: async (_id: string) => ({ ok: true }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["boardActivity"] });
       queryClient.invalidateQueries({ queryKey: ["governanceScore"] });
@@ -162,7 +169,9 @@ export const useDeleteBoardActivityMutation = () => {
 export const useGovernanceScoreQuery = (params: { start_date: string, end_date: string }) => {
   return useQuery({
     queryKey: ["governanceScore", params],
-    queryFn: () => governanceApi.getGovernanceScore(params),
+    queryFn: async () => ({ data: demoGovernance.score }),
+    initialData: { data: demoGovernance.score },
+    staleTime: Infinity,
     enabled: !!params.start_date && !!params.end_date,
   });
 };
