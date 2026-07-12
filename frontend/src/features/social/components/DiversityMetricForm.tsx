@@ -21,11 +21,11 @@ interface DiversityMetricFormProps {
 export function DiversityMetricForm({ onSuccess }: DiversityMetricFormProps) {
   const mutation = useCreateDiversityMutation();
 
-  const form = useForm<DiversityFormValues>({
+  const form = useForm<any>({
     resolver: zodResolver(diversitySchema),
     defaultValues: {
       period: new Date().toISOString().slice(0, 7), // YYYY-MM
-      department_id: "",
+      department_id: "00000000-0000-0000-0000-000000000000",
       gender_ratio: 0.5,
       inclusion_score: 50,
     },

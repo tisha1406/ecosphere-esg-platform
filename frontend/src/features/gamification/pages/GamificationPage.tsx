@@ -137,7 +137,7 @@ export function GamificationPage() {
       </div>
 
       {/* Tabs */}
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
+      <Tabs value={activeTab} onValueChange={setActiveTab} defaultValue="leaderboard" className="space-y-4">
         <TabsList className="bg-muted/50">
           <TabsTrigger value="leaderboard" className="gap-1.5">
             <Trophy className="w-3.5 h-3.5" />
@@ -228,7 +228,7 @@ export function GamificationPage() {
 function BadgeCreateForm({ onSuccess }: { onSuccess: () => void }) {
   const mutation = useCreateBadgeMutation();
 
-  const form = useForm<BadgeFormValues>({
+  const form = useForm<any>({
     resolver: zodResolver(badgeSchema),
     defaultValues: {
       name: "",
@@ -313,7 +313,7 @@ function BadgeCreateForm({ onSuccess }: { onSuccess: () => void }) {
 function AwardPointsForm({ onSuccess }: { onSuccess: () => void }) {
   const mutation = useAwardPointsMutation();
 
-  const form = useForm<AwardPointsValues>({
+  const form = useForm<any>({
     resolver: zodResolver(awardPointsSchema),
     defaultValues: {
       user_id: "",

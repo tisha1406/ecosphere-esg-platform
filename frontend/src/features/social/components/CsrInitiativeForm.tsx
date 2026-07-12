@@ -22,7 +22,7 @@ interface CsrInitiativeFormProps {
 export function CsrInitiativeForm({ onSuccess }: CsrInitiativeFormProps) {
   const mutation = useCreateCsrMutation();
 
-  const form = useForm<CsrFormValues>({
+  const form = useForm<any>({
     resolver: zodResolver(csrSchema),
     defaultValues: {
       name: "",
