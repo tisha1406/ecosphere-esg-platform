@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, Asyn
 from app.main import app
 from app.core.database import Base, get_db
 
-DATABASE_URL = "postgresql+asyncpg://ecosphere_user:ecosphere_password@localhost:5432/ecosphere_test"
+DATABASE_URL = "sqlite+aiosqlite:///:memory:"
 
 engine = create_async_engine(DATABASE_URL, future=True)
 TestingSessionLocal = async_sessionmaker(
