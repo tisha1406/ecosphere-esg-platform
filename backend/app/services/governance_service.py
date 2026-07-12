@@ -20,8 +20,15 @@ class GovernanceService:
     # --- Policy ---
     async def create_policy(self, obj_in: PolicyCreate, user_id: UUID) -> Policy:
         obj = await self.repo.create_policy(obj_in.model_dump())
+        summary_before = await scoring_service.get_score_summary(self.db, "default")
+        old_score = summary_before.total_score
+
         await scoring_service.award_points(self.db, user_id, 10, "Created new governance policy", "policies", obj.id)
-        await scoring_service.recalculate_company_score(self.db)
+        from app.services.gamification_service import GamificationService
+        await GamificationService(self.db).check_new_badges_hook(user_id, 10)
+
+        summary_after = await scoring_service.recalculate_company_score(self.db)
+        await self._check_score_threshold_hook(user_id, old_score, summary_after.total_score)
         return obj
 
     async def get_policy(self, id: UUID) -> Optional[Policy]:
@@ -49,9 +56,17 @@ class GovernanceService:
     # --- Compliance Audit ---
     async def create_compliance_audit(self, obj_in: ComplianceAuditCreate, user_id: UUID) -> ComplianceAudit:
         obj = await self.repo.create_compliance_audit(obj_in.model_dump())
+        summary_before = await scoring_service.get_score_summary(self.db, "default")
+        old_score = summary_before.total_score
+
         await scoring_service.award_points(self.db, user_id, 20, "Submitted compliance audit", "compliance_audits", obj.id)
-        await scoring_service.recalculate_company_score(self.db)
+        from app.services.gamification_service import GamificationService
+        await GamificationService(self.db).check_new_badges_hook(user_id, 20)
+
+        summary_after = await scoring_service.recalculate_company_score(self.db)
+        await self._check_score_threshold_hook(user_id, old_score, summary_after.total_score)
         return obj
+
 
     async def get_compliance_audit(self, id: UUID) -> Optional[ComplianceAudit]:
         return await self.repo.get_compliance_audit(id)
@@ -120,3 +135,14 @@ class GovernanceService:
 
         total_score = round(policy_component + audit_component + board_component, 2)
         return total_score
+
+    async def _check_score_threshold_hook(self, user_id: UUID, old_score: float, new_score: float):
+        if new_score < 40.0 and old_score >= 40.0:
+            await scoring_service.notify(
+                self.db,
+                user_id=user_id,
+                message=f"Alert: Company ESG score has dropped to {new_score} (Red Band).",
+                source_table="esg_score_summaries",
+                source_id=user_id,
+            )
+

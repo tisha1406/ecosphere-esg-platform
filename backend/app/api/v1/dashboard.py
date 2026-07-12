@@ -95,3 +95,15 @@ async def mark_notification_read(
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not your notification")
     updated = await repo.mark_as_read(id)
     return ResponseEnvelope(data=NotificationRead.model_validate(updated))
+
+@router.post(
+    "/notifications/read-all",
+    response_model=ResponseEnvelope[dict],
+    summary="Mark all notifications as read",
+)
+async def mark_all_notifications_read(
+    current_user: User = Depends(require_role(*all_roles)),
+    repo: NotificationRepository = Depends(get_notif_repo),
+):
+    count = await repo.mark_all_read(current_user.id)
+    return ResponseEnvelope(data={"updated_count": count})

@@ -39,6 +39,22 @@ class GamificationService:
         Proxy manual points awarding to the core scoring service.
         """
         await scoring_service.award_points(self.db, user_id, points, reason, source_table, source_id)
+        await self.check_new_badges_hook(user_id, points)
+
+    async def check_new_badges_hook(self, user_id: UUID, points_added: int):
+        total_points = await self.repo.get_user_points_total(user_id)
+        old_points = total_points - points_added
+        badges, _ = await self.repo.get_badges(skip=0, limit=100)
+        for badge in badges:
+            if old_points < badge.points_value <= total_points:
+                await scoring_service.notify(
+                    self.db,
+                    user_id=user_id,
+                    message=f"Congratulations! You've been awarded the '{badge.name}' badge.",
+                    source_table="badges",
+                    source_id=badge.id
+                )
+
 
     async def get_user_points_history(self, user_id: UUID) -> PointsHistoryResponse:
         total = await self.repo.get_user_points_total(user_id)

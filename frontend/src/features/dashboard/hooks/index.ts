@@ -45,3 +45,17 @@ export const useMarkNotificationReadMutation = () => {
     onError: (e: any) => toast.error(e?.message || "Failed to mark notification as read"),
   });
 };
+
+export const useMarkAllNotificationsReadMutation = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: () => dashboardApi.markAllNotificationsRead(),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["notifications"] });
+      qc.invalidateQueries({ queryKey: ["notificationsUnread"] });
+      qc.invalidateQueries({ queryKey: ["dashboardSummary"] });
+      toast.success("All notifications marked as read");
+    },
+    onError: (e: any) => toast.error(e?.message || "Failed to mark notifications as read"),
+  });
+};

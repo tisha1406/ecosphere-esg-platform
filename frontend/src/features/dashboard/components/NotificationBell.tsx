@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Bell } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "../../../shared/components/ui/button";
 import {
   DropdownMenu,
@@ -31,6 +32,21 @@ export function NotificationBell() {
   const notifications: NotificationRecord[] = notifData?.data?.data?.items ?? [];
 
   const markRead = useMarkNotificationReadMutation();
+  const lastSeenNotifId = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (notifications.length > 0) {
+      if (lastSeenNotifId.current) {
+        for (const notif of notifications) {
+          if (notif.id === lastSeenNotifId.current) break;
+          if (!notif.is_read) {
+            toast("New Notification", { description: notif.message });
+          }
+        }
+      }
+      lastSeenNotifId.current = notifications[0].id;
+    }
+  }, [notifications]);
 
   return (
     <DropdownMenu>
@@ -106,6 +122,19 @@ export function NotificationBell() {
             </div>
           ))
         )}
+        <DropdownMenuSeparator />
+        <div className="p-2">
+          <Button 
+            variant="outline" 
+            className="w-full text-xs h-8"
+            onClick={(e) => {
+              e.preventDefault();
+              window.location.href = "/notifications";
+            }}
+          >
+            View all notifications
+          </Button>
+        </div>
       </DropdownMenuContent>
     </DropdownMenu>
   );

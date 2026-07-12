@@ -9,4 +9,7 @@ export const dashboardApi = {
 
   markNotificationRead: (id: string) =>
     apiClient.patch(`/api/v1/dashboard/notifications/${id}/read`),
+
+  markAllNotificationsRead: () =>
+    apiClient.post("/api/v1/dashboard/notifications/read-all"),
 };

@@ -23,12 +23,19 @@ class SocialService:
     # --- EmployeeWellbeing ---
     async def create_wellbeing(self, data: WellbeingCreate, user_id: UUID, company_id: str) -> EmployeeWellbeing:
         obj = await self.repo.create_wellbeing(data)
+        summary_before = await scoring_service.get_score_summary(self.db, company_id)
+        old_score = summary_before.total_score
+
         await scoring_service.award_points(
             self.db, user_id, 5,
             "Logged employee wellbeing survey",
             "employee_wellbeing", obj.id,
         )
-        await scoring_service.recalculate_company_score(self.db, company_id)
+        from app.services.gamification_service import GamificationService
+        await GamificationService(self.db).check_new_badges_hook(user_id, 5)
+
+        summary_after = await scoring_service.recalculate_company_score(self.db, company_id)
+        await self._check_score_threshold_hook(user_id, old_score, summary_after.total_score)
         return obj
 
     async def get_wellbeings(self, **kwargs) -> Tuple[List[EmployeeWellbeing], int]:
@@ -46,13 +53,21 @@ class SocialService:
     # --- CsrInitiative ---
     async def create_csr(self, data: CsrCreate, user_id: UUID) -> CsrInitiative:
         obj = await self.repo.create_csr(data)
+        summary_before = await scoring_service.get_score_summary(self.db, "default")
+        old_score = summary_before.total_score
+
         await scoring_service.award_points(
             self.db, user_id, 15,
             "Created CSR initiative",
             "csr_initiatives", obj.id,
         )
-        await scoring_service.recalculate_company_score(self.db, "default")
+        from app.services.gamification_service import GamificationService
+        await GamificationService(self.db).check_new_badges_hook(user_id, 15)
+
+        summary_after = await scoring_service.recalculate_company_score(self.db, "default")
+        await self._check_score_threshold_hook(user_id, old_score, summary_after.total_score)
         return obj
+
 
     async def get_csrs(self, **kwargs) -> Tuple[List[CsrInitiative], int]:
         return await self.repo.get_csrs(**kwargs)
@@ -113,3 +128,14 @@ class SocialService:
             avg_inclusion=round(avg_inclusion, 4),
             social_score=social_score,
         )
+
+    async def _check_score_threshold_hook(self, user_id: UUID, old_score: float, new_score: float):
+        if new_score < 40.0 and old_score >= 40.0:
+            await scoring_service.notify(
+                self.db,
+                user_id=user_id,
+                message=f"Alert: Company ESG score has dropped to {new_score} (Red Band).",
+                source_table="esg_score_summaries",
+                source_id=user_id,
+            )
+
