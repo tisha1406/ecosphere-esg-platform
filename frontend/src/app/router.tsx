@@ -14,6 +14,7 @@ import { GamificationPage } from "../features/gamification/pages/GamificationPag
 import { ReportsPage } from "../features/reports/pages/ReportsPage"
 import { DashboardPage } from "../features/dashboard/pages/DashboardPage"
 import { NotificationsPage } from "../features/dashboard/pages/NotificationsPage"
+import { SettingsPage } from "../features/settings/pages/SettingsPage"
 
 // Protected Route Wrapper
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -105,6 +106,10 @@ export const router = createBrowserRouter([
       {
         path: "notifications",
         element: <NotificationsPage />,
+      },
+      {
+        path: "settings",
+        element: <SettingsPage />,
       },
     ],
   },

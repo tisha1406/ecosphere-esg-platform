@@ -8,12 +8,10 @@ import { Skeleton } from "../../../shared/components/ui/skeleton";
 import { AlertCircle } from "lucide-react";
 
 export function ReportsPage() {
-  const [params, setParams] = useState<{ company_id: string; period: string } | null>(null);
+  const [params, setParams] = useState<{ company_id: string; period: string }>({ company_id: "default", period: "Q2 2026" });
   const [format, setFormat] = useState<"pdf" | "xlsx">("pdf");
 
-  const { data, isLoading, isError, error } = useConsolidatedReportQuery(
-    params || { company_id: "", period: "" }
-  );
+  const { data, isLoading, isError, error } = useConsolidatedReportQuery(params);
 
   const handleSubmit = (values: ReportBuilderFormValues) => {
     setParams({ company_id: values.company_id, period: values.period });
@@ -63,19 +61,7 @@ export function ReportsPage() {
         <ConsolidatedReportView report={report} />
       )}
       
-      {!report && !isLoading && !isError && (
-        <div className="flex flex-col items-center justify-center p-24 text-center border rounded-lg border-dashed bg-muted/30">
-          <div className="rounded-full bg-primary/10 p-4 mb-4">
-            <svg className="w-8 h-8 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-            </svg>
-          </div>
-          <h3 className="text-xl font-semibold text-foreground">No Report Generated</h3>
-          <p className="text-muted-foreground mt-2 max-w-sm">
-            Select a company and reporting period from the form above to generate a consolidated ESG report.
-          </p>
-        </div>
-      )}
+      {!report && !isLoading && !isError && null}
     </div>
   );
 }

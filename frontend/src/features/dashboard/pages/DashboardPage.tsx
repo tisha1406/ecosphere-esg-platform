@@ -1,5 +1,5 @@
 import React from "react";
-import { useDashboardSummary } from "../hooks";
+import { mockDashboardSummary } from "../mock";
 import { KpiCard } from "../components/KpiCard";
 import { ScoreGauges } from "../components/ScoreGauges";
 import { ActivityStats } from "../components/ActivityStats";
@@ -7,18 +7,16 @@ import { EsgTrendChart } from "../components/EsgTrendChart";
 import { LeaderboardTable } from "../../gamification/components/LeaderboardTable";
 import { NotificationsList } from "../components/NotificationsList";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../../../shared/components/ui/card";
-import { Skeleton } from "../../../shared/components/ui/skeleton";
-import { Leaf, RefreshCw, Trophy } from "lucide-react";
+import { Leaf, Sparkles, Trophy } from "lucide-react";
 import { Button } from "../../../shared/components/ui/button";
 
 export function DashboardPage() {
-  const { data, isLoading, isError, refetch, isFetching } = useDashboardSummary("default");
-
-  const summary = data?.data?.data;
-  const scores = summary?.scores;
-  const activity = summary?.activity;
-  const contributors = summary?.top_contributors ?? [];
-  const notifications = summary?.recent_notifications ?? [];
+  const summary = mockDashboardSummary;
+  const scores = summary.scores;
+  const activity = summary.activity;
+  const contributors = summary.top_contributors;
+  const notifications = summary.recent_notifications;
+  const isLoading = false;
 
   return (
     <div className="flex-1 space-y-6 p-6 md:p-8 pt-6">
@@ -33,34 +31,27 @@ export function DashboardPage() {
               ESG Dashboard
             </h1>
             <p className="text-muted-foreground text-sm">
-              Live cross-module overview · {scores?.period ?? "—"}
+              Static demo data · {scores.period}
             </p>
           </div>
         </div>
         <Button
           variant="outline"
           size="sm"
-          onClick={() => refetch()}
-          disabled={isFetching}
+          disabled
           className="gap-1.5"
         >
-          <RefreshCw className={`w-3.5 h-3.5 ${isFetching ? "animate-spin" : ""}`} />
-          Refresh
+          <Sparkles className="w-3.5 h-3.5" />
+          Demo data
         </Button>
       </div>
 
-      {isError && (
-        <div className="rounded-xl border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive">
-          Failed to load dashboard data. Please try refreshing.
-        </div>
-      )}
-
       {/* ── Hero KPI Row ─────────────────────────────────────────────────── */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
-        <KpiCard variant="overall" trend={scores?.overall ?? { current: 0, previous: null, delta: null }} isLoading={isLoading} />
-        <KpiCard variant="environmental" trend={scores?.environmental ?? { current: 0, previous: null, delta: null }} isLoading={isLoading} />
-        <KpiCard variant="social" trend={scores?.social ?? { current: 0, previous: null, delta: null }} isLoading={isLoading} />
-        <KpiCard variant="governance" trend={scores?.governance ?? { current: 0, previous: null, delta: null }} isLoading={isLoading} />
+        <KpiCard variant="overall" trend={scores.overall} isLoading={isLoading} />
+        <KpiCard variant="environmental" trend={scores.environmental} isLoading={isLoading} />
+        <KpiCard variant="social" trend={scores.social} isLoading={isLoading} />
+        <KpiCard variant="governance" trend={scores.governance} isLoading={isLoading} />
       </div>
 
       {/* ── Activity Counts Strip ─────────────────────────────────────────── */}

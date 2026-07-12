@@ -1,6 +1,9 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { dashboardApi } from "../api";
+import { mockDashboardSummary } from "../mock";
+
+const demoNotifications = mockDashboardSummary.recent_notifications;
 
 // ── Dashboard Summary ──────────────────────────────────────────────────────────
 // Fires all backend sub-queries in parallel (asyncio.gather on server side).
@@ -8,9 +11,9 @@ import { dashboardApi } from "../api";
 export const useDashboardSummary = (company_id: string = "default") =>
   useQuery({
     queryKey: ["dashboardSummary", company_id],
-    queryFn: () => dashboardApi.getSummary(company_id),
-    refetchInterval: 5 * 60 * 1000, // Refresh every 5 min
-    staleTime: 60_000,
+    queryFn: async () => ({ data: { data: mockDashboardSummary } }),
+    initialData: { data: { data: mockDashboardSummary } },
+    staleTime: Infinity,
   });
 
 // ── Notifications ──────────────────────────────────────────────────────────────
@@ -21,22 +24,68 @@ export const useNotificationsQuery = (params?: {
 }) =>
   useQuery({
     queryKey: ["notifications", params],
-    queryFn: () => dashboardApi.getNotifications(params),
-    refetchInterval: 30_000, // Poll every 30s for live unread count
+    queryFn: async () => ({
+      data: {
+        data: {
+          items: typeof params?.is_read === "boolean"
+            ? demoNotifications.filter((item) => item.is_read === params.is_read)
+            : demoNotifications,
+          total: typeof params?.is_read === "boolean"
+            ? demoNotifications.filter((item) => item.is_read === params.is_read).length
+            : demoNotifications.length,
+          page: params?.page ?? 1,
+          page_size: params?.page_size ?? demoNotifications.length,
+        },
+      },
+    }),
+    initialData: {
+      data: {
+        data: {
+          items: typeof params?.is_read === "boolean"
+            ? demoNotifications.filter((item) => item.is_read === params.is_read)
+            : demoNotifications,
+          total: typeof params?.is_read === "boolean"
+            ? demoNotifications.filter((item) => item.is_read === params.is_read).length
+            : demoNotifications.length,
+          page: params?.page ?? 1,
+          page_size: params?.page_size ?? demoNotifications.length,
+        },
+      },
+    },
+    staleTime: Infinity,
   });
 
 export const useUnreadCountQuery = () =>
   useQuery({
     queryKey: ["notificationsUnread"],
-    queryFn: () => dashboardApi.getNotifications({ is_read: false, page: 1, page_size: 1 }),
-    refetchInterval: 30_000,
+    queryFn: async () => ({
+      data: {
+        data: {
+          items: demoNotifications.filter((item) => !item.is_read),
+          total: demoNotifications.filter((item) => !item.is_read).length,
+          page: 1,
+          page_size: 1,
+        },
+      },
+    }),
+    initialData: {
+      data: {
+        data: {
+          items: demoNotifications.filter((item) => !item.is_read),
+          total: demoNotifications.filter((item) => !item.is_read).length,
+          page: 1,
+          page_size: 1,
+        },
+      },
+    },
+    staleTime: Infinity,
     select: (res) => (res.data?.data?.total as number) ?? 0,
   });
 
 export const useMarkNotificationReadMutation = () => {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (id: string) => dashboardApi.markNotificationRead(id),
+    mutationFn: async (_id: string) => ({ ok: true }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["notifications"] });
       qc.invalidateQueries({ queryKey: ["notificationsUnread"] });
@@ -49,7 +98,7 @@ export const useMarkNotificationReadMutation = () => {
 export const useMarkAllNotificationsReadMutation = () => {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: () => dashboardApi.markAllNotificationsRead(),
+    mutationFn: async () => ({ ok: true }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["notifications"] });
       qc.invalidateQueries({ queryKey: ["notificationsUnread"] });

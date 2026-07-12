@@ -45,6 +45,7 @@ function App() {
     { name: "Social", path: "/social", icon: <Users className="w-5 h-5" /> },
     { name: "Governance", path: "/governance", icon: <ShieldCheck className="w-5 h-5" /> },
     { name: "Gamification", path: "/gamification", icon: <Trophy className="w-5 h-5" /> },
+    { name: "Settings", path: "/settings", icon: <Settings className="w-5 h-5" /> },
   ]
 
   const SidebarContent = () => (
