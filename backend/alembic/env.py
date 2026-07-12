@@ -27,6 +27,7 @@ from app.core.database import Base
 from app.models.user import User
 from app.models.settings import CompanySetting
 from app.models.scoring import PointsLedger, EsgScoreSummary
+from app.models.notification import Notification  # Dashboard module
 
 target_metadata = Base.metadata
 

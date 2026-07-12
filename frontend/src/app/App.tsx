@@ -26,6 +26,7 @@ import {
 } from "../shared/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback } from "../shared/components/ui/avatar"
 import { cn } from "../shared/lib/utils"
+import { NotificationBell } from "../features/dashboard/components/NotificationBell"
 
 function App() {
   const { user, logout } = useAuth()
@@ -113,6 +114,7 @@ function App() {
           </div>
           
           <div className="flex items-center gap-4">
+            <NotificationBell />
             <Button
               variant="ghost"
               size="icon"

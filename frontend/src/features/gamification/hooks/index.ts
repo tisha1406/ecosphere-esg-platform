@@ -48,11 +48,12 @@ export const useDeleteBadgeMutation = () => {
 };
 
 // ── Leaderboard ────────────────────────────────────────────
-export const useLeaderboardQuery = (params?: { period?: string; limit?: number }) =>
+export const useLeaderboardQuery = (params?: { period?: string; limit?: number }, options?: any) =>
   useQuery({
     queryKey: ["leaderboard", params],
     queryFn: () => gamificationApi.getLeaderboard(params),
     refetchInterval: 60_000, // Poll every 60s for live scores
+    ...options,
   });
 
 // ── Points History ─────────────────────────────────────────
