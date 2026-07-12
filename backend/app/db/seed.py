@@ -116,8 +116,8 @@ async def seed_data():
 
         # Notifications
         notifs = [
-            Notification(user_id=employee_user.id, title="Welcome!", message="Welcome to the EcoSphere ESG Platform.", is_read=False),
-            Notification(user_id=env_user.id, title="Data Due", message="Please submit Q1 emissions data.", is_read=False)
+            Notification(user_id=employee_user.id, message="Welcome to the EcoSphere ESG Platform.", is_read=False),
+            Notification(user_id=env_user.id, message="Please submit Q1 emissions data.", is_read=False)
         ]
         db.add_all(notifs)
 
