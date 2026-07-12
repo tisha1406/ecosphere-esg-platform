@@ -9,6 +9,8 @@ import { Register } from "../features/auth/Register"
 import { ForgotPassword } from "../features/auth/ForgotPassword"
 import { EnvironmentalPage } from "../features/environmental/pages/EnvironmentalPage"
 import { GovernancePage } from "../features/governance/pages/GovernancePage"
+import { SocialPage } from "../features/social/pages/SocialPage"
+import { GamificationPage } from "../features/gamification/pages/GamificationPage"
 
 // Protected Route Wrapper
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -98,7 +100,7 @@ export const router = createBrowserRouter([
       },
       {
         path: "social",
-        element: <ModuleStub title="Social Module" />,
+        element: <SocialPage />,
       },
       {
         path: "governance",
@@ -106,7 +108,7 @@ export const router = createBrowserRouter([
       },
       {
         path: "gamification",
-        element: <ModuleStub title="Gamification & Leaderboard" />,
+        element: <GamificationPage />,
       },
       {
         path: "settings",
