@@ -1,0 +1,119 @@
+import React from "react"
+import { createBrowserRouter, Navigate, Outlet } from "react-router-dom"
+import { useAuth } from "./providers/AuthProvider"
+import App from "./App"
+
+// Auth Pages
+import { Login } from "../features/auth/Login"
+import { Register } from "../features/auth/Register"
+import { ForgotPassword } from "../features/auth/ForgotPassword"
+
+// Protected Route Wrapper
+const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+  const { isAuthenticated, isLoading } = useAuth()
+
+  if (isLoading) {
+    return <div className="flex h-screen items-center justify-center">Loading...</div>
+  }
+
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />
+  }
+
+  return <>{children}</>
+}
+
+// Public Route Wrapper (redirects to dashboard if already logged in)
+const PublicRoute = ({ children }: { children: React.ReactNode }) => {
+  const { isAuthenticated, isLoading } = useAuth()
+
+  if (isLoading) {
+    return <div className="flex h-screen items-center justify-center">Loading...</div>
+  }
+
+  if (isAuthenticated) {
+    return <Navigate to="/" replace />
+  }
+
+  return <>{children}</>
+}
+
+// Dashboard Placeholder Views
+const DashboardStub = () => (
+  <div className="p-6">
+    <h2 className="text-3xl font-bold mb-4">Dashboard</h2>
+    <p className="text-muted-foreground">Welcome to the EcoSphere ESG Platform. Modules will be available soon.</p>
+  </div>
+)
+
+const ModuleStub = ({ title }: { title: string }) => (
+  <div className="p-6">
+    <h2 className="text-3xl font-bold mb-4">{title}</h2>
+    <p className="text-muted-foreground">This module is currently under development.</p>
+  </div>
+)
+
+export const router = createBrowserRouter([
+  {
+    path: "/login",
+    element: (
+      <PublicRoute>
+        <Login />
+      </PublicRoute>
+    ),
+  },
+  {
+    path: "/register",
+    element: (
+      <PublicRoute>
+        <Register />
+      </PublicRoute>
+    ),
+  },
+  {
+    path: "/forgot-password",
+    element: (
+      <PublicRoute>
+        <ForgotPassword />
+      </PublicRoute>
+    ),
+  },
+  {
+    path: "/",
+    element: (
+      <ProtectedRoute>
+        <App />
+      </ProtectedRoute>
+    ),
+    children: [
+      {
+        index: true,
+        element: <DashboardStub />,
+      },
+      {
+        path: "environmental",
+        element: <ModuleStub title="Environmental Module" />,
+      },
+      {
+        path: "social",
+        element: <ModuleStub title="Social Module" />,
+      },
+      {
+        path: "governance",
+        element: <ModuleStub title="Governance Module" />,
+      },
+      {
+        path: "gamification",
+        element: <ModuleStub title="Gamification & Leaderboard" />,
+      },
+      {
+        path: "settings",
+        element: <ModuleStub title="Company Settings" />,
+      },
+    ],
+  },
+  {
+    path: "*",
+    element: <Navigate to="/" replace />,
+  },
+])

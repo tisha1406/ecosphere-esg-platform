@@ -50,6 +50,18 @@ module.exports = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        environmental: {
+          DEFAULT: "hsl(var(--environmental))",
+          foreground: "hsl(var(--environmental-foreground))",
+        },
+        social: {
+          DEFAULT: "hsl(var(--social))",
+          foreground: "hsl(var(--social-foreground))",
+        },
+        governance: {
+          DEFAULT: "hsl(var(--governance))",
+          foreground: "hsl(var(--governance-foreground))",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
