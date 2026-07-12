@@ -13,6 +13,14 @@ from app.models.environmental import (
     EnergyTypeEnum,
     WasteTypeEnum,
 )
+from app.models.social import (
+    Department,
+    Employee,
+    EmployeeWellbeing,
+    CsrInitiative,
+    DiversityMetric,
+    CsrStatusEnum,
+)
 
 __all__ = [
     "Base",
@@ -30,4 +38,10 @@ __all__ = [
     "ScopeEnum",
     "EnergyTypeEnum",
     "WasteTypeEnum",
+    "Department",
+    "Employee",
+    "EmployeeWellbeing",
+    "CsrInitiative",
+    "DiversityMetric",
+    "CsrStatusEnum",
 ]

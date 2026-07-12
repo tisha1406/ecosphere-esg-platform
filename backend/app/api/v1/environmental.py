@@ -16,7 +16,7 @@ from app.schemas.environmental import (
 )
 from app.services.environmental_service import EnvironmentalService
 
-router = APIRouter(prefix="/environmental", tags=["Environmental"])
+router = APIRouter(prefix="/api/v1/environmental", tags=["Environmental"])
 
 # Roles
 write_roles = [UserRole.admin, UserRole.esg_manager, UserRole.environmental_officer]

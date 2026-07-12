@@ -7,7 +7,7 @@ from app.models.user import UserRole, User
 from app.core.security import create_access_token
 from app.models.environmental import Company, Facility
 
-pytestmark = pytest.mark.asyncio
+pytestmark = pytest.mark.anyio
 
 async def create_user_and_token(db_session: AsyncSession, role: UserRole):
     user = User(
