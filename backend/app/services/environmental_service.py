@@ -22,10 +22,17 @@ class EnvironmentalService:
     # --- CarbonEmission ---
     async def create_carbon_emission(self, data: CarbonEmissionCreate, user_id: UUID) -> CarbonEmission:
         obj = await self.repo.create_carbon_emission(data)
+        summary_before = await scoring_service.get_score_summary(self.db, str(data.company_id))
+        old_score = summary_before.total_score
+
         await scoring_service.award_points(
             self.db, user_id, 10, "Logged carbon emission data", "carbon_emissions", obj.id
         )
-        await scoring_service.recalculate_company_score(self.db, str(data.company_id))
+        from app.services.gamification_service import GamificationService
+        await GamificationService(self.db).check_new_badges_hook(user_id, 10)
+
+        summary_after = await scoring_service.recalculate_company_score(self.db, str(data.company_id))
+        await self._check_score_threshold_hook(user_id, old_score, summary_after.total_score)
         return obj
 
     async def get_carbon_emissions(self, **kwargs) -> Tuple[List[CarbonEmission], int]:
@@ -46,10 +53,17 @@ class EnvironmentalService:
         from app.models.environmental import Facility
         facility = await self.db.get(Facility, data.facility_id)
         if facility:
+            summary_before = await scoring_service.get_score_summary(self.db, str(facility.company_id))
+            old_score = summary_before.total_score
+
             await scoring_service.award_points(
                 self.db, user_id, 10, "Logged energy usage data", "energy_usage", obj.id
             )
-            await scoring_service.recalculate_company_score(self.db, str(facility.company_id))
+            from app.services.gamification_service import GamificationService
+            await GamificationService(self.db).check_new_badges_hook(user_id, 10)
+
+            summary_after = await scoring_service.recalculate_company_score(self.db, str(facility.company_id))
+            await self._check_score_threshold_hook(user_id, old_score, summary_after.total_score)
         return obj
 
     async def get_energy_usages(self, **kwargs) -> Tuple[List[EnergyUsage], int]:
@@ -67,10 +81,17 @@ class EnvironmentalService:
     # --- WasteTracking ---
     async def create_waste_tracking(self, data: WasteTrackingCreate, user_id: UUID) -> WasteTracking:
         obj = await self.repo.create_waste_tracking(data)
+        summary_before = await scoring_service.get_score_summary(self.db, str(data.company_id))
+        old_score = summary_before.total_score
+
         await scoring_service.award_points(
             self.db, user_id, 10, "Logged waste tracking data", "waste_tracking", obj.id
         )
-        await scoring_service.recalculate_company_score(self.db, str(data.company_id))
+        from app.services.gamification_service import GamificationService
+        await GamificationService(self.db).check_new_badges_hook(user_id, 10)
+
+        summary_after = await scoring_service.recalculate_company_score(self.db, str(data.company_id))
+        await self._check_score_threshold_hook(user_id, old_score, summary_after.total_score)
         return obj
 
     async def get_waste_trackings(self, **kwargs) -> Tuple[List[WasteTracking], int]:
@@ -84,6 +105,17 @@ class EnvironmentalService:
 
     async def delete_waste_tracking(self, id: UUID) -> bool:
         return await self.repo.delete_waste_tracking(id)
+
+    async def _check_score_threshold_hook(self, user_id: UUID, old_score: float, new_score: float):
+        if new_score < 40.0 and old_score >= 40.0:
+            await scoring_service.notify(
+                self.db,
+                user_id=user_id,
+                message=f"Alert: Company ESG score has dropped to {new_score} (Red Band).",
+                source_table="esg_score_summaries",
+                source_id=user_id,
+            )
+
 
     # --- Scoring ---
     async def compute_environmental_score(self, company_id: UUID, start_date: date, end_date: date) -> float:

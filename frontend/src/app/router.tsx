@@ -13,6 +13,7 @@ import { SocialPage } from "../features/social/pages/SocialPage"
 import { GamificationPage } from "../features/gamification/pages/GamificationPage"
 import { ReportsPage } from "../features/reports/pages/ReportsPage"
 import { DashboardPage } from "../features/dashboard/pages/DashboardPage"
+import { NotificationsPage } from "../features/dashboard/pages/NotificationsPage"
 
 // Protected Route Wrapper
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -119,6 +120,10 @@ export const router = createBrowserRouter([
       {
         path: "settings",
         element: <ModuleStub title="Company Settings" />,
+      },
+      {
+        path: "notifications",
+        element: <NotificationsPage />,
       },
     ],
   },

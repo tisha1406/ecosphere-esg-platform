@@ -70,3 +70,16 @@ class NotificationRepository:
             await self.session.commit()
             await self.session.refresh(obj)
         return obj
+
+    async def mark_all_read(self, user_id: UUID) -> int:
+        from sqlalchemy import update
+        stmt = (
+            update(Notification)
+            .where(Notification.user_id == user_id)
+            .where(Notification.is_read == False)
+            .values(is_read=True)
+        )
+        result = await self.session.execute(stmt)
+        await self.session.commit()
+        return result.rowcount
+
