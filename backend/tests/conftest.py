@@ -1,4 +1,3 @@
-import asyncio
 import pytest
 from typing import AsyncGenerator
 from httpx import AsyncClient, ASGITransport
@@ -15,9 +14,11 @@ TestingSessionLocal = async_sessionmaker(
     expire_on_commit=False
 )
 
+
 @pytest.fixture(scope="session")
 def anyio_backend():
     return "asyncio"
+
 
 @pytest.fixture(scope="session", autouse=True)
 async def init_db():
@@ -27,16 +28,25 @@ async def init_db():
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.drop_all)
 
+
 @pytest.fixture
 async def db_session() -> AsyncGenerator[AsyncSession, None]:
     async with TestingSessionLocal() as session:
         yield session
 
+
 @pytest.fixture
 async def client(db_session: AsyncSession) -> AsyncGenerator[AsyncClient, None]:
     async def override_get_db():
         yield db_session
+
     app.dependency_overrides[get_db] = override_get_db
-    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
+    # Use follow_redirects + a persistent cookie store so Set-Cookie headers
+    # from /login are automatically included in subsequent requests (/refresh).
+    async with AsyncClient(
+        transport=ASGITransport(app=app),
+        base_url="http://test",
+        follow_redirects=True,
+    ) as ac:
         yield ac
     app.dependency_overrides.clear()

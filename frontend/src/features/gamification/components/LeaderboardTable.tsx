@@ -35,7 +35,7 @@ interface LeaderboardTableProps {
 export function LeaderboardTable({ period = "all-time", limit = 20, entries: propEntries, isLoading: propIsLoading }: LeaderboardTableProps) {
   const { data, isLoading: queryIsLoading } = useLeaderboardQuery({ period, limit }, { enabled: !propEntries });
 
-  const entries: LeaderboardEntry[] = propEntries || data?.data?.entries || [];
+  const entries: LeaderboardEntry[] = propEntries || (data as any)?.entries || [];
   const isLoading = propIsLoading !== undefined ? propIsLoading : queryIsLoading;
 
   if (isLoading) {
