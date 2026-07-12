@@ -1,23 +1,34 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-import os
+from app.core.config import settings
+from app.core.exceptions import register_exception_handlers
+from app.api.v1.router import api_router
 
-app = FastAPI(title="EcoSphere API", version="1.0.0")
+app = FastAPI(
+    title="EcoSphere ESG Management Platform API",
+    description="Backend API services for ESG indicators tracking and gamification system.",
+    version="1.0.0"
+)
 
-origins = os.getenv("CORS_ORIGINS", "http://localhost:5173,http://localhost").split(",")
+# Exception handlers setup
+register_exception_handlers(app)
 
+# CORS setup
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=settings.CORS_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Routes registration
+app.include_router(api_router)
 
 @app.get("/api/v1/health")
 async def health_check():
     return {
         "success": True,
         "data": {"status": "ok"},
-        "message": ""
+        "message": "EcoSphere Core API operational"
     }

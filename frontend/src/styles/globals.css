@@ -24,6 +24,14 @@
     --input: 214.3 31.8% 91.4%;
     --ring: 222.2 84% 4.9%;
     --radius: 0.5rem;
+
+    /* ESG Theme Colors */
+    --environmental: 142.1 76.2% 36.3%; /* Green */
+    --environmental-foreground: 355.7 100% 97.3%;
+    --social: 221.2 83.2% 53.3%; /* Blue */
+    --social-foreground: 210 40% 98%;
+    --governance: 262.1 83.3% 57.8%; /* Purple */
+    --governance-foreground: 210 40% 98%;
   }
 
   .dark {
@@ -46,6 +54,14 @@
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
     --ring: 212.7 26.8% 83.9%;
+
+    /* ESG Theme Colors Dark Mode */
+    --environmental: 142.1 70.6% 45.3%;
+    --environmental-foreground: 144.9 80.4% 10%;
+    --social: 217.2 91.2% 64.8%;
+    --social-foreground: 222.2 47.4% 11.2%;
+    --governance: 263.4 70% 60.4%;
+    --governance-foreground: 210 40% 98%;
   }
 }
 
