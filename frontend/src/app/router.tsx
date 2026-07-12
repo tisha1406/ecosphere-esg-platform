@@ -7,6 +7,8 @@ import App from "./App"
 import { Login } from "../features/auth/Login"
 import { Register } from "../features/auth/Register"
 import { ForgotPassword } from "../features/auth/ForgotPassword"
+import { EnvironmentalPage } from "../features/environmental/pages/EnvironmentalPage"
+import { GovernancePage } from "../features/governance/pages/GovernancePage"
 
 // Protected Route Wrapper
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -92,7 +94,7 @@ export const router = createBrowserRouter([
       },
       {
         path: "environmental",
-        element: <ModuleStub title="Environmental Module" />,
+        element: <EnvironmentalPage />,
       },
       {
         path: "social",
@@ -100,7 +102,7 @@ export const router = createBrowserRouter([
       },
       {
         path: "governance",
-        element: <ModuleStub title="Governance Module" />,
+        element: <GovernancePage />,
       },
       {
         path: "gamification",
