@@ -1,5 +1,5 @@
 import enum
-from sqlalchemy import Column, String, Float, Enum, Date, ForeignKey
+from sqlalchemy import Column, String, Float, Enum, Date, ForeignKey, Boolean
 from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import UUID
 from app.core.database import Base
@@ -66,3 +66,23 @@ class WasteTracking(Base, AuditMixin):
     company_id = Column(UUID(as_uuid=True), ForeignKey("companies.id"), nullable=False, index=True)
 
     company = relationship("Company", back_populates="waste_trackings")
+
+class CarbonSourceTypeEnum(str, enum.Enum):
+    purchase = "purchase"
+    manufacturing = "manufacturing"
+    expense = "expense"
+    fleet = "fleet"
+
+class CarbonTransaction(Base, AuditMixin):
+    __tablename__ = "carbon_transactions"
+    date = Column(Date, nullable=False, index=True)
+    source_type = Column(Enum(CarbonSourceTypeEnum, name="carbonsourcetypeenum"), nullable=False)
+    source_ref = Column(String(255), nullable=True) # ID or reference to purchase/expense
+    emission_factor_id = Column(UUID(as_uuid=True), ForeignKey("emission_factors.id"), nullable=False)
+    quantity = Column(Float, nullable=False)
+    calculated_co2e = Column(Float, nullable=False, default=0.0)
+    department_id = Column(UUID(as_uuid=True), ForeignKey("departments.id"), nullable=False)
+    auto_generated = Column(Boolean, default=False)
+
+    emission_factor = relationship("EmissionFactor")
+    department = relationship("Department")

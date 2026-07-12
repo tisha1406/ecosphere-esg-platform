@@ -121,7 +121,7 @@ export function ChartWidget({
   }
 
   return (
-    <Card className="w-full">
+    <Card className="w-full glass-card">
       <CardHeader>
         <CardTitle>{title}</CardTitle>
         {description && <CardDescription>{description}</CardDescription>}

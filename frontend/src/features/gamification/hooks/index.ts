@@ -2,43 +2,19 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { gamificationApi } from "../api";
 import { BadgeFormValues, BadgeUpdateValues, AwardPointsValues } from "../schema";
-import { mockBadgeRecords, mockLeaderboardEntries, mockPointsHistory } from "../mock";
-
-const mockBadgesResponse = {
-  data: {
-    items: mockBadgeRecords,
-    total: mockBadgeRecords.length,
-    page: 1,
-    page_size: mockBadgeRecords.length,
-  },
-};
-
-const mockLeaderboardResponse = {
-  period: "all-time",
-  limit: 20,
-  entries: mockLeaderboardEntries,
-};
-
-const mockPointsResponse = {
-  data: {
-    total_points: 6015,
-    history: mockPointsHistory,
-  },
-};
 
 // ── Badges ─────────────────────────────────────────────────
 export const useBadgesQuery = (params?: any) =>
   useQuery({
     queryKey: ["badges", params],
-    queryFn: async () => mockBadgesResponse,
-    initialData: mockBadgesResponse,
-    staleTime: Infinity,
+    queryFn: () => gamificationApi.getBadges(params),
+    staleTime: 30_000,
   });
 
 export const useCreateBadgeMutation = () => {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (_data: BadgeFormValues) => ({ ok: true }),
+    mutationFn: (data: BadgeFormValues) => gamificationApi.createBadge(data),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["badges"] });
       toast.success("Badge created");
@@ -50,7 +26,7 @@ export const useCreateBadgeMutation = () => {
 export const useUpdateBadgeMutation = () => {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (_payload: { id: string; data: BadgeUpdateValues }) => ({ ok: true }),
+    mutationFn: ({ id, data }: { id: string; data: BadgeUpdateValues }) => gamificationApi.updateBadge(id, data),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["badges"] });
       toast.success("Badge updated");
@@ -62,7 +38,7 @@ export const useUpdateBadgeMutation = () => {
 export const useDeleteBadgeMutation = () => {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (_id: string) => ({ ok: true }),
+    mutationFn: (id: string) => gamificationApi.deleteBadge(id),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["badges"] });
       toast.success("Badge deleted");
@@ -75,9 +51,8 @@ export const useDeleteBadgeMutation = () => {
 export const useLeaderboardQuery = (params?: { period?: string; limit?: number }, options?: any) =>
   useQuery({
     queryKey: ["leaderboard", params],
-    queryFn: async () => mockLeaderboardResponse,
-    initialData: mockLeaderboardResponse,
-    staleTime: Infinity,
+    queryFn: () => gamificationApi.getLeaderboard(params),
+    staleTime: 30_000,
     ...options,
   });
 
@@ -85,9 +60,8 @@ export const useLeaderboardQuery = (params?: { period?: string; limit?: number }
 export const useUserPointsQuery = (userId: string) =>
   useQuery({
     queryKey: ["userPoints", userId],
-    queryFn: async () => mockPointsResponse,
-    initialData: mockPointsResponse,
-    staleTime: Infinity,
+    queryFn: () => gamificationApi.getUserPoints(userId),
+    staleTime: 30_000,
     enabled: !!userId,
   });
 
@@ -95,7 +69,7 @@ export const useUserPointsQuery = (userId: string) =>
 export const useAwardPointsMutation = () => {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (_data: AwardPointsValues) => ({ ok: true }),
+    mutationFn: (data: AwardPointsValues) => gamificationApi.awardPoints(data),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["leaderboard"] });
       qc.invalidateQueries({ queryKey: ["userPoints"] });

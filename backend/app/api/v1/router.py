@@ -1,9 +1,10 @@
 from fastapi import APIRouter
-from app.api.v1 import auth, settings, environmental, social, governance, gamification, reports, dashboard
+from app.api.v1 import auth, settings, environmental, social, governance, gamification, reports, dashboard, master
 
 api_router = APIRouter()
 api_router.include_router(auth.router)
 api_router.include_router(settings.router)
+api_router.include_router(master.router)
 api_router.include_router(environmental.router)
 api_router.include_router(governance.router)
 api_router.include_router(social.router)

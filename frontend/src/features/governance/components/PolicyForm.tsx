@@ -23,12 +23,12 @@ export function PolicyForm({ onSuccess }: { onSuccess: () => void }) {
     }
   });
 
-  const onSubmit = async (data: PolicyFormValues) => {
-    if (data.owner_id === "00000000-0000-0000-0000-000000000000") {
-      data.owner_id = uuidv4(); 
-    }
-    await mutation.mutateAsync(data);
-    onSuccess();
+  const onSubmit = (data: PolicyFormValues) => {
+    mutation.mutate(data, {
+      onSuccess: () => {
+        onSuccess();
+      }
+    });
   };
 
   return (

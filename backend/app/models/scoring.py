@@ -21,3 +21,15 @@ class EsgScoreSummary(Base, AuditMixin):
     social_score = Column(Float, nullable=False, default=0.0)
     governance_score = Column(Float, nullable=False, default=0.0)
     total_score = Column(Float, nullable=False, default=0.0)
+
+class DepartmentScore(Base, AuditMixin):
+    __tablename__ = "department_scores"
+    department_id = Column(UUID(as_uuid=True), ForeignKey("departments.id"), nullable=False, index=True)
+    period = Column(String(50), nullable=False, index=True)
+    environmental_score = Column(Float, nullable=False, default=0.0)
+    social_score = Column(Float, nullable=False, default=0.0)
+    governance_score = Column(Float, nullable=False, default=0.0)
+    total_score = Column(Float, nullable=False, default=0.0)
+
+    from sqlalchemy.orm import relationship
+    department = relationship("Department")

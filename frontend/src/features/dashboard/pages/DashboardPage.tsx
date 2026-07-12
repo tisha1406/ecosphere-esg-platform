@@ -1,6 +1,7 @@
 import React from "react";
+import { PageHeader } from "../../../shared/components/PageHeader";
 import { mockDashboardSummary } from "../mock";
-import { KpiCard } from "../components/KpiCard";
+import { KpiCard } from "../../../shared/components/KpiCard";
 import { ScoreGauges } from "../components/ScoreGauges";
 import { ActivityStats } from "../components/ActivityStats";
 import { EsgTrendChart } from "../components/EsgTrendChart";
@@ -21,37 +22,48 @@ export function DashboardPage() {
   return (
     <div className="flex-1 space-y-6 p-6 md:p-8 pt-6">
       {/* ── Page Header ─────────────────────────────────────────────────── */}
-      <div className="flex items-center justify-between flex-wrap gap-3">
-        <div className="flex items-center gap-3">
-          <div className="p-2.5 rounded-xl bg-gradient-to-br from-primary/20 to-environmental/10">
-            <Leaf className="w-6 h-6 text-environmental" />
-          </div>
-          <div>
-            <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight bg-gradient-to-r from-environmental via-primary to-blue-500 bg-clip-text text-transparent">
-              ESG Dashboard
-            </h1>
-            <p className="text-muted-foreground text-sm">
-              Static demo data · {scores.period}
-            </p>
-          </div>
-        </div>
-        <Button
-          variant="outline"
-          size="sm"
-          disabled
-          className="gap-1.5"
-        >
+      <PageHeader 
+        title="ESG Dashboard" 
+        description={`Static demo data · ${scores.period}`}
+        icon={<Leaf className="w-6 h-6 text-environmental" />}
+        iconBg="bg-gradient-to-br from-primary/20 to-environmental/10"
+      >
+        <Button variant="outline" size="sm" disabled className="gap-1.5">
           <Sparkles className="w-3.5 h-3.5" />
           Demo data
         </Button>
-      </div>
+      </PageHeader>
 
       {/* ── Hero KPI Row ─────────────────────────────────────────────────── */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
-        <KpiCard variant="overall" trend={scores.overall} isLoading={isLoading} />
-        <KpiCard variant="environmental" trend={scores.environmental} isLoading={isLoading} />
-        <KpiCard variant="social" trend={scores.social} isLoading={isLoading} />
-        <KpiCard variant="governance" trend={scores.governance} isLoading={isLoading} />
+        <KpiCard 
+          title="Overall ESG Score" 
+          value={scores.overall.current.toFixed(1)} 
+          variant="overall" 
+          trend={{ value: scores.overall.delta || 0, label: "vs last period", isPositive: (scores.overall.delta || 0) >= 0 }} 
+          isLoading={isLoading} 
+        />
+        <KpiCard 
+          title="Environmental" 
+          value={scores.environmental.current.toFixed(1)} 
+          variant="environmental" 
+          trend={{ value: scores.environmental.delta || 0, label: "vs last period", isPositive: (scores.environmental.delta || 0) >= 0 }} 
+          isLoading={isLoading} 
+        />
+        <KpiCard 
+          title="Social" 
+          value={scores.social.current.toFixed(1)} 
+          variant="social" 
+          trend={{ value: scores.social.delta || 0, label: "vs last period", isPositive: (scores.social.delta || 0) >= 0 }} 
+          isLoading={isLoading} 
+        />
+        <KpiCard 
+          title="Governance" 
+          value={scores.governance.current.toFixed(1)} 
+          variant="governance" 
+          trend={{ value: scores.governance.delta || 0, label: "vs last period", isPositive: (scores.governance.delta || 0) >= 0 }} 
+          isLoading={isLoading} 
+        />
       </div>
 
       {/* ── Activity Counts Strip ─────────────────────────────────────────── */}

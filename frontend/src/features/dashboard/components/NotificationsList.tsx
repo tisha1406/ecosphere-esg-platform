@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "../../../shared/components/ui/card";
 import { Skeleton } from "../../../shared/components/ui/skeleton";
+import { EmptyState } from "../../../shared/components/EmptyState";
 import { Badge } from "../../../shared/components/ui/badge";
 import { Button } from "../../../shared/components/ui/button";
 import { NotificationRecord } from "../schema";
@@ -57,10 +58,12 @@ export function NotificationsList({ notifications = [], isLoading = false }: Not
       </CardHeader>
       <CardContent>
         {notifications.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
-            <BellOff className="w-10 h-10 mb-3 opacity-30" />
-            <p className="text-sm">No notifications yet.</p>
-          </div>
+          <EmptyState
+            title="No notifications yet"
+            description="You're all caught up! New notifications will appear here."
+            icon={<BellOff className="w-8 h-8 text-muted-foreground" />}
+            className="py-8"
+          />
         ) : (
           <div className="space-y-2">
             {notifications.map((notif) => (

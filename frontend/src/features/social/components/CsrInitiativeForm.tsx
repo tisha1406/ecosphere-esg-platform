@@ -31,18 +31,20 @@ export function CsrInitiativeForm({ onSuccess }: CsrInitiativeFormProps) {
       status: "planned",
       start_date: new Date().toISOString().split("T")[0],
       end_date: "",
-      responsible_id: "",
     },
   });
 
-  const onSubmit = async (data: CsrFormValues) => {
+  const onSubmit = (data: CsrFormValues) => {
     const payload: CsrFormValues = {
       ...data,
       end_date: data.end_date || undefined,
       responsible_id: data.responsible_id || undefined,
     };
-    await mutation.mutateAsync(payload);
-    onSuccess();
+    mutation.mutate(payload, {
+      onSuccess: () => {
+        onSuccess();
+      }
+    });
   };
 
   return (

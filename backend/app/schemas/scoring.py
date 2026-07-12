@@ -41,3 +41,24 @@ class EsgScoreSummaryRead(BaseModel):
     total_score: float
     created_at: datetime
     updated_at: datetime
+
+class DepartmentScoreCreate(BaseModel):
+    department_id: UUID
+    period: str
+    environmental_score: float = 0.0
+    social_score: float = 0.0
+    governance_score: float = 0.0
+    total_score: float = 0.0
+
+class DepartmentScoreRead(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    
+    id: UUID
+    department_id: UUID
+    period: str
+    environmental_score: float
+    social_score: float
+    governance_score: float
+    total_score: float
+    created_at: datetime
+    updated_at: datetime

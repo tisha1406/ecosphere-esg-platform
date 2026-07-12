@@ -110,3 +110,42 @@ class WasteTrackingUpdate(BaseModel):
 class WasteTrackingRead(WasteTrackingBase):
     id: UUID
     model_config = ConfigDict(from_attributes=True)
+
+from app.models.environmental import CarbonSourceTypeEnum
+
+class CarbonTransactionBase(BaseModel):
+    date: date
+    source_type: CarbonSourceTypeEnum
+    source_ref: Optional[str] = None
+    emission_factor_id: UUID
+    quantity: float = Field(..., ge=0.0)
+    department_id: UUID
+    
+    @field_validator("date")
+    @classmethod
+    def validate_date(cls, v):
+        return validate_date_not_future(v)
+
+class CarbonTransactionCreate(CarbonTransactionBase):
+    pass
+
+class CarbonTransactionUpdate(BaseModel):
+    date: Optional[date] = None
+    source_type: Optional[CarbonSourceTypeEnum] = None
+    source_ref: Optional[str] = None
+    emission_factor_id: Optional[UUID] = None
+    quantity: Optional[float] = Field(None, ge=0.0)
+    department_id: Optional[UUID] = None
+
+    @field_validator("date")
+    @classmethod
+    def validate_date(cls, v):
+        if v:
+            return validate_date_not_future(v)
+        return v
+
+class CarbonTransactionRead(CarbonTransactionBase):
+    id: UUID
+    calculated_co2e: float
+    auto_generated: bool
+    model_config = ConfigDict(from_attributes=True)

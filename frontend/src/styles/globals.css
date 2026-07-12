@@ -23,7 +23,15 @@
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
     --ring: 222.2 84% 4.9%;
-    --radius: 0.5rem;
+    --radius: 0.75rem;
+
+    /* Semantic Status Colors */
+    --success: 142.1 76.2% 36.3%;
+    --success-foreground: 355.7 100% 97.3%;
+    --warning: 38 92% 50%;
+    --warning-foreground: 48 96% 89%;
+    --info: 199 89% 48%;
+    --info-foreground: 210 40% 98%;
 
     /* ESG Theme Colors */
     --environmental: 142.1 76.2% 36.3%; /* Green */
@@ -32,14 +40,17 @@
     --social-foreground: 210 40% 98%;
     --governance: 262.1 83.3% 57.8%; /* Purple */
     --governance-foreground: 210 40% 98%;
+    --gamification: 38 92% 50%; /* Amber */
+    --gamification-foreground: 48 96% 89%;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
+    /* Premium Slate Dark Theme */
+    --background: 222 47% 7%;
     --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
+    --card: 222 47% 11%;
     --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 4.9%;
+    --popover: 222 47% 11%;
     --popover-foreground: 210 40% 98%;
     --primary: 210 40% 98%;
     --primary-foreground: 222.2 47.4% 11.2%;
@@ -55,6 +66,14 @@
     --input: 217.2 32.6% 17.5%;
     --ring: 212.7 26.8% 83.9%;
 
+    /* Semantic Status Colors Dark Mode */
+    --success: 142.1 70.6% 45.3%;
+    --success-foreground: 144.9 80.4% 10%;
+    --warning: 48 96% 53%;
+    --warning-foreground: 38 92% 10%;
+    --info: 199 89% 48%;
+    --info-foreground: 210 40% 98%;
+
     /* ESG Theme Colors Dark Mode */
     --environmental: 142.1 70.6% 45.3%;
     --environmental-foreground: 144.9 80.4% 10%;
@@ -62,6 +81,8 @@
     --social-foreground: 222.2 47.4% 11.2%;
     --governance: 263.4 70% 60.4%;
     --governance-foreground: 210 40% 98%;
+    --gamification: 48 96% 53%;
+    --gamification-foreground: 38 92% 10%;
   }
 }
 
@@ -71,5 +92,11 @@
   }
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+@layer utilities {
+  .glass-card {
+    @apply bg-card/60 backdrop-blur-md border border-border/50 shadow-sm;
   }
 }

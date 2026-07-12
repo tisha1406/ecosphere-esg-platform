@@ -1,5 +1,5 @@
 from datetime import date
-from typing import Optional
+from typing import Optional, List
 from uuid import UUID
 from fastapi import APIRouter, Depends, Query, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -82,6 +82,11 @@ async def update_carbon_emission(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Carbon emission not found")
     return ResponseEnvelope(data=CarbonEmissionRead.model_validate(obj))
 
+from app.models.environmental import CarbonTransaction
+from app.schemas.environmental import (
+    CarbonTransactionCreate, CarbonTransactionUpdate, CarbonTransactionRead
+)
+
 @router.delete("/emissions/{id}", response_model=ResponseEnvelope[dict])
 async def delete_carbon_emission(
     id: UUID,
@@ -91,6 +96,67 @@ async def delete_carbon_emission(
     success = await service.delete_carbon_emission(id)
     if not success:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Carbon emission not found")
+    return ResponseEnvelope(data={"deleted": True})
+
+# --- CarbonTransactions ---
+@router.post("/transactions", response_model=ResponseEnvelope[CarbonTransactionRead], status_code=status.HTTP_201_CREATED)
+async def create_carbon_transaction(data: CarbonTransactionCreate, db: AsyncSession = Depends(get_db), current_user: User = Depends(require_role(*write_roles))):
+    from app.models.master import EmissionFactor
+    from app.models.settings import CompanySetting
+    from sqlalchemy import select
+
+    # Rule: Calculate CO2e
+    emission_factor = await db.get(EmissionFactor, data.emission_factor_id)
+    if not emission_factor:
+        raise HTTPException(status_code=404, detail="Emission factor not found")
+        
+    result = await db.execute(select(CompanySetting).limit(1))
+    settings = result.scalars().first()
+    
+    calculated = data.quantity * emission_factor.factor_value
+    
+    db_obj = CarbonTransaction(
+        **data.model_dump(), 
+        calculated_co2e=calculated,
+        auto_generated=settings.auto_emission_calculation if settings else False
+    )
+    db.add(db_obj)
+    await db.commit()
+    await db.refresh(db_obj)
+    return ResponseEnvelope(data=CarbonTransactionRead.model_validate(db_obj))
+
+@router.get("/transactions", response_model=ResponseEnvelope[List[CarbonTransactionRead]])
+async def get_carbon_transactions(db: AsyncSession = Depends(get_db), current_user: User = Depends(require_role(*read_roles))):
+    from sqlalchemy import select
+    result = await db.execute(select(CarbonTransaction))
+    items = result.scalars().all()
+    return ResponseEnvelope(data=[CarbonTransactionRead.model_validate(i) for i in items])
+
+@router.get("/transactions/{id}", response_model=ResponseEnvelope[CarbonTransactionRead])
+async def get_carbon_transaction(id: UUID, db: AsyncSession = Depends(get_db), current_user: User = Depends(require_role(*read_roles))):
+    db_obj = await db.get(CarbonTransaction, id)
+    if not db_obj:
+        raise HTTPException(status_code=404, detail="Carbon transaction not found")
+    return ResponseEnvelope(data=CarbonTransactionRead.model_validate(db_obj))
+
+@router.patch("/transactions/{id}", response_model=ResponseEnvelope[CarbonTransactionRead])
+async def update_carbon_transaction(id: UUID, data: CarbonTransactionUpdate, db: AsyncSession = Depends(get_db), current_user: User = Depends(require_role(*write_roles))):
+    db_obj = await db.get(CarbonTransaction, id)
+    if not db_obj:
+        raise HTTPException(status_code=404, detail="Carbon transaction not found")
+    for key, value in data.model_dump(exclude_unset=True).items():
+        setattr(db_obj, key, value)
+    await db.commit()
+    await db.refresh(db_obj)
+    return ResponseEnvelope(data=CarbonTransactionRead.model_validate(db_obj))
+
+@router.delete("/transactions/{id}", response_model=ResponseEnvelope[dict])
+async def delete_carbon_transaction(id: UUID, db: AsyncSession = Depends(get_db), current_user: User = Depends(require_role(*write_roles))):
+    db_obj = await db.get(CarbonTransaction, id)
+    if not db_obj:
+        raise HTTPException(status_code=404, detail="Carbon transaction not found")
+    await db.delete(db_obj)
+    await db.commit()
     return ResponseEnvelope(data={"deleted": True})
 
 # --- EnergyUsage ---

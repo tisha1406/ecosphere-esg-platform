@@ -1,4 +1,4 @@
-import React from "react"
+import React, { useEffect, useState } from "react"
 import { cn } from "../lib/utils"
 import { ScoreBand } from "../types/api.types"
 
@@ -17,8 +17,15 @@ export function ScoreGauge({
   className,
   size = "md"
 }: ScoreGaugeProps) {
+  const [mounted, setMounted] = useState(false)
   const percentage = Math.min(Math.max(score / maxScore, 0), 1)
   
+  useEffect(() => {
+    // Small delay to ensure CSS transition fires on mount
+    const timer = setTimeout(() => setMounted(true), 50)
+    return () => clearTimeout(timer)
+  }, [])
+
   let band: ScoreBand = "low"
   if (score >= 70) band = "high"
   else if (score >= 40) band = "medium"
@@ -32,11 +39,12 @@ export function ScoreGauge({
   const { svg, stroke, font, labelFont } = sizeMap[size]
   const radius = (svg - stroke) / 2
   const circumference = radius * 2 * Math.PI
-  const offset = circumference - percentage * circumference
+  // Initially offset is full circumference (0% fill). On mount, it animates to actual offset.
+  const offset = mounted ? circumference - percentage * circumference : circumference
 
   const colorClass = 
-    band === "high" ? "text-environmental" :
-    band === "medium" ? "text-yellow-500" :
+    band === "high" ? "text-success" :
+    band === "medium" ? "text-warning" :
     "text-destructive"
 
   return (
@@ -44,7 +52,7 @@ export function ScoreGauge({
       <svg
         width={svg}
         height={svg}
-        className="transform -rotate-90 transition-all duration-1000 ease-in-out"
+        className="transform -rotate-90"
       >
         <circle
           cx={svg / 2}
@@ -58,7 +66,7 @@ export function ScoreGauge({
           cx={svg / 2}
           cy={svg / 2}
           r={radius}
-          className={cn("stroke-current transition-all duration-1000 ease-in-out", colorClass)}
+          className={cn("stroke-current transition-all duration-[1500ms] ease-out", colorClass)}
           strokeWidth={stroke}
           fill="transparent"
           strokeDasharray={circumference}

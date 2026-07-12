@@ -10,7 +10,7 @@ import {
 import { Button } from "./ui/button"
 import { Input } from "./ui/input"
 import { Skeleton } from "./ui/skeleton"
-import { ChevronLeft, ChevronRight, Search } from "lucide-react"
+import { ChevronLeft, ChevronRight, Search, Download } from "lucide-react"
 
 interface Column<T> {
   header: string
@@ -27,6 +27,7 @@ interface DataTableProps<T> {
   onPageChange?: (page: number) => void
   onSearch?: (term: string) => void
   searchPlaceholder?: string
+  exportable?: boolean
 }
 
 export function DataTable<T>({
@@ -38,7 +39,8 @@ export function DataTable<T>({
   currentPage = 1,
   onPageChange,
   onSearch,
-  searchPlaceholder = "Search..."
+  searchPlaceholder = "Search...",
+  exportable = true
 }: DataTableProps<T>) {
   const [searchTerm, setSearchTerm] = useState("")
   const totalPages = Math.max(1, Math.ceil(totalItems / pageSize))
@@ -51,28 +53,55 @@ export function DataTable<T>({
     }
   }
 
+  const handleExport = () => {
+    // Placeholder for actual export logic
+    const headers = columns.map(c => c.header).join(",")
+    const csvData = data.map(row => 
+      columns.map(col => {
+        if (typeof col.accessor === "function") return "" // Skip complex rendered columns in simple export
+        return row[col.accessor]
+      }).join(",")
+    ).join("\n")
+    
+    const blob = new Blob([`${headers}\n${csvData}`], { type: "text/csv" })
+    const url = window.URL.createObjectURL(blob)
+    const a = document.createElement("a")
+    a.href = url
+    a.download = "export.csv"
+    a.click()
+  }
+
   return (
     <div className="space-y-4">
-      {onSearch && (
-        <div className="flex items-center space-x-2">
-          <div className="relative flex-1 max-w-sm">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder={searchPlaceholder}
-              value={searchTerm}
-              onChange={handleSearch}
-              className="pl-8"
-            />
+      <div className="flex items-center justify-between">
+        {onSearch ? (
+          <div className="flex items-center space-x-2 flex-1 max-w-sm">
+            <div className="relative w-full">
+              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder={searchPlaceholder}
+                value={searchTerm}
+                onChange={handleSearch}
+                className="pl-8 bg-background"
+              />
+            </div>
           </div>
-        </div>
-      )}
+        ) : <div />}
+        
+        {exportable && data.length > 0 && (
+          <Button variant="outline" size="sm" onClick={handleExport} className="ml-2">
+            <Download className="w-4 h-4 mr-2" />
+            Export CSV
+          </Button>
+        )}
+      </div>
       
-      <div className="rounded-md border">
+      <div className="rounded-md border border-border/50 bg-card/80 backdrop-blur-sm overflow-hidden shadow-sm">
         <Table>
-          <TableHeader>
-            <TableRow>
+          <TableHeader className="bg-muted/50">
+            <TableRow className="hover:bg-transparent">
               {columns.map((col, i) => (
-                <TableHead key={i}>{col.header}</TableHead>
+                <TableHead key={i} className="font-semibold text-foreground/80">{col.header}</TableHead>
               ))}
             </TableRow>
           </TableHeader>
@@ -89,13 +118,13 @@ export function DataTable<T>({
               ))
             ) : data.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={columns.length} className="h-24 text-center">
+                <TableCell colSpan={columns.length} className="h-32 text-center text-muted-foreground">
                   No results found.
                 </TableCell>
               </TableRow>
             ) : (
               data.map((row, rowIndex) => (
-                <TableRow key={rowIndex}>
+                <TableRow key={rowIndex} className="group hover:bg-muted/50 transition-colors">
                   {columns.map((col, colIndex) => (
                     <TableCell key={colIndex}>
                       {typeof col.accessor === "function"

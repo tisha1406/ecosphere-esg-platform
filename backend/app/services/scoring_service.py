@@ -74,12 +74,26 @@ async def recalculate_company_score(
     db: AsyncSession,
     company_id: str = "default"
 ) -> EsgScoreSummary:
+    from app.models.settings import CompanySetting
+    
     period = "2026"  # Baseline default period for aggregate scoring
     summary = await get_score_summary(db, company_id, period)
     
-    # Simple algorithm: average of components
+    # Rule 7 (Custom Weights): Connect scoring_service to dynamic settings
+    result = await db.execute(select(CompanySetting).limit(1))
+    settings = result.scalars().first()
+    
+    if settings:
+        w_env = settings.weight_environmental / 100.0
+        w_soc = settings.weight_social / 100.0
+        w_gov = settings.weight_governance / 100.0
+    else:
+        w_env, w_soc, w_gov = 0.333, 0.333, 0.333
+        
     summary.total_score = round(
-        (summary.environmental_score + summary.social_score + summary.governance_score) / 3,
+        (summary.environmental_score * w_env) + 
+        (summary.social_score * w_soc) + 
+        (summary.governance_score * w_gov),
         2
     )
     await db.commit()

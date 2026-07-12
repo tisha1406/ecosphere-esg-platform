@@ -18,20 +18,26 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "../../../shared/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "../../../shared/components/ui/dropdown-menu";
 import { useAuth } from "../../../app/providers/AuthProvider";
 import { WellbeingSurveyForm } from "../components/WellbeingSurveyForm";
 import { CsrInitiativeForm } from "../components/CsrInitiativeForm";
 import { DiversityMetricForm } from "../components/DiversityMetricForm";
 import { CsrInitiativeList } from "../components/CsrInitiativeList";
-import { DiversityChart } from "../components/DiversityChart";
+import { DiversityDashboardTab } from "../components/DiversityDashboardTab";
 import { WellbeingTrendChart } from "../components/WellbeingTrendChart";
-import { SocialScoreCard } from "../components/SocialScoreCard";
-import { DataTable } from "../../../shared/components/DataTable";
-import { useWellbeingQuery, useDeleteWellbeingMutation, useDeleteDiversityMutation, useDiversityQuery } from "../hooks";
-import { Badge } from "../../../shared/components/ui/badge";
-import { Plus, Trash2 } from "lucide-react";
+import { SocialScoreStrip } from "../components/SocialScoreStrip";
+import { WellbeingTable } from "../components/WellbeingTable";
+import { DiversityTable } from "../components/DiversityTable";
+import { PageHeader } from "../../../shared/components/PageHeader";
+import { EmptyState } from "../../../shared/components/EmptyState";
+import { Plus, Heart, Users, HeartHandshake, FileBadge, ClipboardCheck } from "lucide-react";
 
 const writeRoles = ["admin", "esg_manager", "social_officer"];
 
@@ -39,252 +45,158 @@ export function SocialPage() {
   const { user } = useAuth();
   const isReadOnly = !user?.role || !writeRoles.includes(user.role);
 
-  const [activeTab, setActiveTab] = useState("score");
+  const [activeTab, setActiveTab] = useState("csr");
   const [wellbeingOpen, setWellbeingOpen] = useState(false);
   const [csrOpen, setCsrOpen] = useState(false);
   const [diversityOpen, setDiversityOpen] = useState(false);
 
   return (
-    <div className="flex-1 space-y-4 p-8 pt-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-3xl font-bold tracking-tight text-blue-600 dark:text-blue-400">
-            Social Module
-          </h2>
-          <p className="text-muted-foreground text-sm mt-0.5">
-            Wellbeing surveys, CSR initiatives, and diversity metrics
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          {!isReadOnly && activeTab === "wellbeing" && (
-            <Dialog open={wellbeingOpen} onOpenChange={setWellbeingOpen}>
-              <DialogTrigger asChild>
-                <Button className="bg-blue-600 hover:bg-blue-700 text-white">
-                  <Plus className="mr-2 h-4 w-4" />
-                  Add Survey
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Record Wellbeing Survey</DialogTitle>
-                </DialogHeader>
-                <WellbeingSurveyForm onSuccess={() => setWellbeingOpen(false)} />
-              </DialogContent>
-            </Dialog>
-          )}
-          {!isReadOnly && activeTab === "csr" && (
-            <Dialog open={csrOpen} onOpenChange={setCsrOpen}>
-              <DialogTrigger asChild>
-                <Button className="bg-blue-600 hover:bg-blue-700 text-white">
-                  <Plus className="mr-2 h-4 w-4" />
-                  Add Initiative
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="max-w-lg">
-                <DialogHeader>
-                  <DialogTitle>New CSR Initiative</DialogTitle>
-                </DialogHeader>
-                <CsrInitiativeForm onSuccess={() => setCsrOpen(false)} />
-              </DialogContent>
-            </Dialog>
-          )}
-          {!isReadOnly && activeTab === "diversity" && (
-            <Dialog open={diversityOpen} onOpenChange={setDiversityOpen}>
-              <DialogTrigger asChild>
-                <Button className="bg-blue-600 hover:bg-blue-700 text-white">
-                  <Plus className="mr-2 h-4 w-4" />
-                  Add Metric
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Record Diversity Metric</DialogTitle>
-                </DialogHeader>
-                <DiversityMetricForm onSuccess={() => setDiversityOpen(false)} />
-              </DialogContent>
-            </Dialog>
-          )}
-        </div>
-      </div>
+    <div className="flex-1 space-y-4">
+      <PageHeader 
+        title="Social Module" 
+        description="Manage CSR initiatives, employee wellbeing, and diversity metrics."
+      >
+        {!isReadOnly && (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button className="bg-social hover:bg-social/90 text-social-foreground shadow-sm">
+                <Plus className="mr-2 h-4 w-4" /> Add Record
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-48 glass-card">
+              <DropdownMenuItem onClick={() => setCsrOpen(true)} className="cursor-pointer">
+                <HeartHandshake className="mr-2 h-4 w-4 text-muted-foreground" /> CSR Initiative
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setWellbeingOpen(true)} className="cursor-pointer">
+                <Heart className="mr-2 h-4 w-4 text-muted-foreground" /> Wellbeing Survey
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setDiversityOpen(true)} className="cursor-pointer">
+                <Users className="mr-2 h-4 w-4 text-muted-foreground" /> Diversity Metric
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
+      </PageHeader>
+
+      <SocialScoreStrip />
+
+      {/* Dialogs */}
+      {!isReadOnly && (
+        <>
+          <Dialog open={wellbeingOpen} onOpenChange={setWellbeingOpen}>
+            <DialogContent className="glass-card sm:max-w-[500px]">
+              <DialogHeader>
+                <DialogTitle>Record Wellbeing Survey</DialogTitle>
+              </DialogHeader>
+              <WellbeingSurveyForm onSuccess={() => setWellbeingOpen(false)} />
+            </DialogContent>
+          </Dialog>
+
+          <Dialog open={csrOpen} onOpenChange={setCsrOpen}>
+            <DialogContent className="glass-card sm:max-w-[500px]">
+              <DialogHeader>
+                <DialogTitle>New CSR Initiative</DialogTitle>
+              </DialogHeader>
+              <CsrInitiativeForm onSuccess={() => setCsrOpen(false)} />
+            </DialogContent>
+          </Dialog>
+
+          <Dialog open={diversityOpen} onOpenChange={setDiversityOpen}>
+            <DialogContent className="glass-card sm:max-w-[500px]">
+              <DialogHeader>
+                <DialogTitle>Record Diversity Metric</DialogTitle>
+              </DialogHeader>
+              <DiversityMetricForm onSuccess={() => setDiversityOpen(false)} />
+            </DialogContent>
+          </Dialog>
+        </>
+      )}
 
       {/* Tabs */}
-      <Tabs value={activeTab} onValueChange={setActiveTab} defaultValue="score" className="space-y-4">
-        <TabsList className="bg-blue-50 dark:bg-blue-950/30">
-          <TabsTrigger
-            value="score"
-            className="data-[state=active]:bg-blue-600 data-[state=active]:text-white"
-          >
-            Score Overview
-          </TabsTrigger>
-          <TabsTrigger
-            value="wellbeing"
-            className="data-[state=active]:bg-blue-600 data-[state=active]:text-white"
-          >
-            Wellbeing
-          </TabsTrigger>
-          <TabsTrigger
-            value="csr"
-            className="data-[state=active]:bg-blue-600 data-[state=active]:text-white"
-          >
-            CSR Initiatives
-          </TabsTrigger>
-          <TabsTrigger
-            value="diversity"
-            className="data-[state=active]:bg-blue-600 data-[state=active]:text-white"
-          >
-            Diversity
-          </TabsTrigger>
+      <Tabs value={activeTab} onValueChange={setActiveTab} defaultValue="csr" className="space-y-6">
+        <TabsList className="bg-card/50 backdrop-blur-sm border border-border/50 p-1 flex-wrap h-auto justify-start">
+          <TabsTrigger value="csr">CSR Activities</TabsTrigger>
+          <TabsTrigger value="participation">Employee Participation</TabsTrigger>
+          <TabsTrigger value="diversity">Diversity Dashboard</TabsTrigger>
+          <TabsTrigger value="wellbeing">Wellbeing</TabsTrigger>
+          <TabsTrigger value="volunteering">Volunteer Programs</TabsTrigger>
         </TabsList>
 
-        {/* Score Tab */}
-        <TabsContent value="score" className="space-y-4">
-          <SocialScoreCard />
+        <TabsContent value="csr" className="space-y-4 focus-visible:outline-none">
+          <CsrInitiativeList isReadOnly={isReadOnly} />
         </TabsContent>
 
-        {/* Wellbeing Tab */}
-        <TabsContent value="wellbeing" className="space-y-4">
-          <WellbeingTrendChart />
-          <WellbeingTable isReadOnly={isReadOnly} />
-        </TabsContent>
-
-        {/* CSR Tab */}
-        <TabsContent value="csr" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>CSR Initiatives</CardTitle>
-              <CardDescription>
-                Track community and social responsibility programs.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <CsrInitiativeList isReadOnly={isReadOnly} />
+        <TabsContent value="participation" className="space-y-4 focus-visible:outline-none">
+          <Card className="glass-card">
+            <CardContent className="pt-6">
+              <EmptyState 
+                title="Employee Participation Coming Soon"
+                description="We're building a dedicated queue and approval system for employee participation in CSR activities. This feature requires pending backend endpoint support."
+                icon={<ClipboardCheck className="w-12 h-12 text-muted-foreground opacity-50" />}
+                action={
+                  <Button variant="outline" disabled>
+                    Feature in Development
+                  </Button>
+                }
+              />
             </CardContent>
           </Card>
         </TabsContent>
 
-        {/* Diversity Tab */}
-        <TabsContent value="diversity" className="space-y-4">
-          <DiversityChart />
-          <DiversityTable isReadOnly={isReadOnly} />
+        <TabsContent value="diversity" className="space-y-4 focus-visible:outline-none">
+          <DiversityDashboardTab />
+          <Card className="glass-card mt-6">
+            <CardHeader>
+              <CardTitle>Diversity Records</CardTitle>
+              <CardDescription>Historical diversity metrics by department and period.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <DiversityTable isReadOnly={isReadOnly} />
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="wellbeing" className="space-y-6 focus-visible:outline-none">
+          <div className="grid gap-6 md:grid-cols-2">
+            <WellbeingTrendChart />
+            <Card className="glass-card">
+              <CardContent className="flex flex-col items-center justify-center h-full min-h-[300px] text-center p-6">
+                <Heart className="w-16 h-16 text-social mb-4 opacity-80" />
+                <h3 className="text-2xl font-bold mb-2">Employee Wellbeing</h3>
+                <p className="text-muted-foreground">
+                  Track and measure employee satisfaction over time. Consistent check-ins help identify burnout risks and promote a healthier workplace culture.
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+          <Card className="glass-card">
+            <CardHeader>
+              <CardTitle>Survey Records</CardTitle>
+              <CardDescription>All employee wellbeing survey submissions.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <WellbeingTable isReadOnly={isReadOnly} />
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="volunteering" className="space-y-4 focus-visible:outline-none">
+          <Card className="glass-card">
+            <CardContent className="pt-6">
+              <EmptyState 
+                title="Volunteer Programs Coming Soon"
+                description="A dedicated module for tracking individual volunteer hours and external programs is currently in development. It will require a distinct backend endpoint."
+                icon={<FileBadge className="w-12 h-12 text-muted-foreground opacity-50" />}
+                action={
+                  <Button variant="outline" disabled>
+                    Feature in Development
+                  </Button>
+                }
+              />
+            </CardContent>
+          </Card>
         </TabsContent>
       </Tabs>
     </div>
-  );
-}
-
-// ── Inline sub-tables ──────────────────────────────────────────────────────────
-
-function WellbeingTable({ isReadOnly }: { isReadOnly: boolean }) {
-  const [page, setPage] = useState(1);
-  const { data, isLoading } = useWellbeingQuery({ page, page_size: 10 });
-  const deleteMutation = useDeleteWellbeingMutation();
-  const items = data?.data?.items || [];
-  const total = data?.data?.total || 0;
-
-  const columns = [
-    { header: "Employee ID", accessor: (row: any) => row.employee_id.slice(0, 8) + "…" },
-    { header: "Date", accessor: "survey_date" as const },
-    {
-      header: "Score",
-      accessor: (row: any) => (
-        <Badge
-          variant={row.satisfaction_score >= 7 ? "default" : row.satisfaction_score >= 4 ? "secondary" : "outline"}
-        >
-          {row.satisfaction_score} / 10
-        </Badge>
-      ),
-    },
-    {
-      header: "Actions",
-      accessor: (row: any) =>
-        !isReadOnly ? (
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => deleteMutation.mutate(row.id)}
-          >
-            <Trash2 className="h-4 w-4 text-destructive" />
-          </Button>
-        ) : null,
-    },
-  ];
-
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Survey Records</CardTitle>
-        <CardDescription>All employee wellbeing survey submissions.</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <DataTable
-          columns={columns}
-          data={items}
-          totalItems={total}
-          currentPage={page}
-          pageSize={10}
-          onPageChange={setPage}
-          loading={isLoading}
-        />
-      </CardContent>
-    </Card>
-  );
-}
-
-function DiversityTable({ isReadOnly }: { isReadOnly: boolean }) {
-  const [page, setPage] = useState(1);
-  const { data, isLoading } = useDiversityQuery({ page, page_size: 10 });
-  const deleteMutation = useDeleteDiversityMutation();
-  const items = data?.data?.items || [];
-  const total = data?.data?.total || 0;
-
-  const columns = [
-    { header: "Period", accessor: "period" as const },
-    { header: "Dept ID", accessor: (row: any) => row.department_id.slice(0, 8) + "…" },
-    {
-      header: "Gender Ratio",
-      accessor: (row: any) => `${Math.round(row.gender_ratio * 100)}%`,
-    },
-    {
-      header: "Inclusion Score",
-      accessor: (row: any) => (
-        <Badge variant={row.inclusion_score >= 70 ? "default" : "secondary"}>
-          {row.inclusion_score.toFixed(1)}
-        </Badge>
-      ),
-    },
-    {
-      header: "Actions",
-      accessor: (row: any) =>
-        !isReadOnly ? (
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => deleteMutation.mutate(row.id)}
-          >
-            <Trash2 className="h-4 w-4 text-destructive" />
-          </Button>
-        ) : null,
-    },
-  ];
-
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Diversity Records</CardTitle>
-        <CardDescription>Historical diversity metrics by department and period.</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <DataTable
-          columns={columns}
-          data={items}
-          totalItems={total}
-          currentPage={page}
-          pageSize={10}
-          onPageChange={setPage}
-          loading={isLoading}
-        />
-      </CardContent>
-    </Card>
   );
 }

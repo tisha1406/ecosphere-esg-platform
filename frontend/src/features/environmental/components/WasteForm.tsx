@@ -23,12 +23,12 @@ export function WasteForm({ onSuccess }: { onSuccess: () => void }) {
     }
   });
 
-  const onSubmit = async (data: WasteFormValues) => {
-    if (data.company_id === "00000000-0000-0000-0000-000000000000") {
-      data.company_id = uuidv4(); 
-    }
-    await mutation.mutateAsync(data);
-    onSuccess();
+  const onSubmit = (data: WasteFormValues) => {
+    mutation.mutate(data, {
+      onSuccess: () => {
+        onSuccess();
+      }
+    });
   };
 
   return (

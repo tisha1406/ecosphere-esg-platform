@@ -235,6 +235,72 @@ async def delete_diversity(
 
 
 # ──────────────────────────────────────────────────
+# Employee Participation  /api/v1/social/participations
+# ──────────────────────────────────────────────────
+from app.models.social import EmployeeParticipation
+from app.schemas.social import EmployeeParticipationCreate, EmployeeParticipationUpdate, EmployeeParticipationRead
+from typing import List
+from sqlalchemy import select
+
+@router.post("/participations", response_model=ResponseEnvelope[EmployeeParticipationRead], status_code=status.HTTP_201_CREATED)
+async def create_participation(data: EmployeeParticipationCreate, db: AsyncSession = Depends(get_db), current_user: User = Depends(require_role(*write_roles))):
+    db_obj = EmployeeParticipation(**data.model_dump())
+    db.add(db_obj)
+    await db.commit()
+    await db.refresh(db_obj)
+    return ResponseEnvelope(data=EmployeeParticipationRead.model_validate(db_obj))
+
+@router.get("/participations", response_model=ResponseEnvelope[List[EmployeeParticipationRead]])
+async def list_participations(db: AsyncSession = Depends(get_db), current_user: User = Depends(require_role(*read_roles))):
+    result = await db.execute(select(EmployeeParticipation))
+    items = result.scalars().all()
+    return ResponseEnvelope(data=[EmployeeParticipationRead.model_validate(i) for i in items])
+
+@router.get("/participations/{id}", response_model=ResponseEnvelope[EmployeeParticipationRead])
+async def get_participation(id: UUID, db: AsyncSession = Depends(get_db), current_user: User = Depends(require_role(*read_roles))):
+    db_obj = await db.get(EmployeeParticipation, id)
+    if not db_obj:
+        raise HTTPException(status_code=404, detail="Participation not found")
+    return ResponseEnvelope(data=EmployeeParticipationRead.model_validate(db_obj))
+
+@router.patch("/participations/{id}", response_model=ResponseEnvelope[EmployeeParticipationRead])
+async def update_participation(id: UUID, data: EmployeeParticipationUpdate, db: AsyncSession = Depends(get_db), current_user: User = Depends(require_role(*write_roles))):
+    from app.models.settings import CompanySetting
+    
+    db_obj = await db.get(EmployeeParticipation, id)
+    if not db_obj:
+        raise HTTPException(status_code=404, detail="Participation not found")
+        
+    # Rule 2: CSR Evidence Required
+    if data.approval_status == EmployeeParticipationApprovalEnum.approved:
+        # Check if the activity requires evidence, OR if global settings require evidence
+        await db.refresh(db_obj, ['activity'])
+        result = await db.execute(select(CompanySetting).limit(1))
+        settings = result.scalars().first()
+        
+        proof = data.proof if data.proof is not None else db_obj.proof
+        
+        if (db_obj.activity.evidence_required or (settings and settings.csr_evidence_required)):
+            if not proof or proof.strip() == "":
+                raise HTTPException(status_code=400, detail="Cannot approve CSR activity: Proof of participation is required.")
+                
+    for key, value in data.model_dump(exclude_unset=True).items():
+        setattr(db_obj, key, value)
+    await db.commit()
+    await db.refresh(db_obj)
+    return ResponseEnvelope(data=EmployeeParticipationRead.model_validate(db_obj))
+
+@router.delete("/participations/{id}", response_model=ResponseEnvelope[dict])
+async def delete_participation(id: UUID, db: AsyncSession = Depends(get_db), current_user: User = Depends(require_role(*write_roles))):
+    db_obj = await db.get(EmployeeParticipation, id)
+    if not db_obj:
+        raise HTTPException(status_code=404, detail="Participation not found")
+    await db.delete(db_obj)
+    await db.commit()
+    return ResponseEnvelope(data={"deleted": True})
+
+
+# ──────────────────────────────────────────────────
 # Social Score  /api/v1/social/score
 # ──────────────────────────────────────────────────
 @router.get("/score", response_model=ResponseEnvelope[SocialScoreRead])
