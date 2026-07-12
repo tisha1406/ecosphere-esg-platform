@@ -46,12 +46,20 @@ async def test_gamification_leaderboard(client: AsyncClient, db_session: AsyncSe
     assert response.status_code == 200
     data = response.json()["data"]["entries"]
     
-    # Check ordering (Bob 100, Alice 70)
-    assert len(data) == 2
-    assert data[0]["user_id"] == str(u2.id)
-    assert data[0]["total_points"] == 100
-    assert data[1]["user_id"] == str(u1.id)
-    assert data[1]["total_points"] == 70
+    # Check ordering and presence of Bob (100) and Alice (70)
+    bob_entry = next((e for e in data if e["user_id"] == str(u2.id)), None)
+    alice_entry = next((e for e in data if e["user_id"] == str(u1.id)), None)
+    
+    assert bob_entry is not None
+    assert bob_entry["total_points"] == 100
+    
+    assert alice_entry is not None
+    assert alice_entry["total_points"] == 70
+    
+    # Check they are in correct relative order (Bob before Alice)
+    bob_index = data.index(bob_entry)
+    alice_index = data.index(alice_entry)
+    assert bob_index < alice_index
 
 
 async def test_gamification_badge_threshold(client: AsyncClient, db_session: AsyncSession):

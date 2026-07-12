@@ -16,7 +16,7 @@ from app.schemas.governance import (
 )
 from app.services.governance_service import GovernanceService
 
-router = APIRouter(prefix="/governance", tags=["Governance"])
+router = APIRouter(prefix="/api/v1/governance", tags=["Governance"])
 
 write_roles = [UserRole.admin, UserRole.esg_manager, UserRole.governance_officer]
 read_roles = list(UserRole)

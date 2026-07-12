@@ -45,21 +45,6 @@ const PublicRoute = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>
 }
 
-// Dashboard Placeholder Views
-const DashboardStub = () => (
-  <div className="p-6">
-    <h2 className="text-3xl font-bold mb-4">Dashboard</h2>
-    <p className="text-muted-foreground">Welcome to the EcoSphere ESG Platform. Modules will be available soon.</p>
-  </div>
-)
-
-const ModuleStub = ({ title }: { title: string }) => (
-  <div className="p-6">
-    <h2 className="text-3xl font-bold mb-4">{title}</h2>
-    <p className="text-muted-foreground">This module is currently under development.</p>
-  </div>
-)
-
 export const router = createBrowserRouter([
   {
     path: "/login",
@@ -116,10 +101,6 @@ export const router = createBrowserRouter([
       {
         path: "reports",
         element: <ReportsPage />,
-      },
-      {
-        path: "settings",
-        element: <ModuleStub title="Company Settings" />,
       },
       {
         path: "notifications",
