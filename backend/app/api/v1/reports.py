@@ -1,10 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.responses import StreamingResponse
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.db.session import get_db
+from app.core.database import get_db
 from app.services.reports_service import ReportsService
 from app.schemas.reports import ConsolidatedReport, ExportRequest
-from app.core.auth import get_current_active_user
+from app.core.dependencies import get_current_user
 from app.models.user import User
 
 router = APIRouter(prefix="/api/v1/reports", tags=["Reports"])
@@ -14,7 +14,7 @@ async def get_consolidated_report(
     company_id: str = Query(..., description="The ID of the company"),
     period: str = Query(..., description="The reporting period (e.g., Q1-2026, 2026-FY)"),
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_active_user)
+    current_user: User = Depends(get_current_user)
 ):
     """
     Get a consolidated ESG report for a specific company and period.
@@ -26,7 +26,7 @@ async def get_consolidated_report(
 async def export_report(
     request: ExportRequest,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_active_user)
+    current_user: User = Depends(get_current_user)
 ):
     """
     Export the consolidated ESG report as PDF or XLSX.

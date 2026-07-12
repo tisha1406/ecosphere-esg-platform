@@ -4,6 +4,7 @@ from app.models.user import User, UserRole
 from app.models.settings import CompanySetting
 from app.models.scoring import PointsLedger, EsgScoreSummary
 from app.models.gamification import Badge
+from app.models.notification import Notification
 
 from app.models.environmental import (
     Company,
@@ -59,4 +60,5 @@ __all__ = [
     "ComplianceAudit",
     "BoardActivity",
     "PolicyStatusEnum",
+    "Notification",
 ]

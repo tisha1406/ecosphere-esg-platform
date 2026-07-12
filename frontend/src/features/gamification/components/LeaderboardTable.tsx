@@ -28,12 +28,15 @@ const medalConfig: Record<number, { icon: React.ReactNode; bg: string; text: str
 interface LeaderboardTableProps {
   period?: string;
   limit?: number;
+  entries?: LeaderboardEntry[];
+  isLoading?: boolean;
 }
 
-export function LeaderboardTable({ period = "all-time", limit = 20 }: LeaderboardTableProps) {
-  const { data, isLoading } = useLeaderboardQuery({ period, limit });
+export function LeaderboardTable({ period = "all-time", limit = 20, entries: propEntries, isLoading: propIsLoading }: LeaderboardTableProps) {
+  const { data, isLoading: queryIsLoading } = useLeaderboardQuery({ period, limit }, { enabled: !propEntries });
 
-  const entries: LeaderboardEntry[] = data?.data?.entries || [];
+  const entries: LeaderboardEntry[] = propEntries || data?.data?.entries || [];
+  const isLoading = propIsLoading !== undefined ? propIsLoading : queryIsLoading;
 
   if (isLoading) {
     return (

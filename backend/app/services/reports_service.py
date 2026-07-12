@@ -7,7 +7,7 @@ from app.schemas.reports import ConsolidatedReport, TrendPoint, InitiativeSummar
 from sqlalchemy import select, desc
 from app.models.social import CsrInitiative
 from app.models.user import User
-from app.models.gamification import PointsHistory
+from app.models.scoring import PointsLedger
 from sqlalchemy.sql import func
 import openpyxl
 from reportlab.lib.pagesizes import letter
@@ -38,8 +38,8 @@ class ReportsService:
         # Assuming gamification points ledger or PointsHistory
         # We will aggregate points per user
         result_points = await self.db.execute(
-            select(User.full_name, func.sum(PointsHistory.points).label("total_points"))
-            .join(PointsHistory, User.id == PointsHistory.user_id)
+            select(User.full_name, func.sum(PointsLedger.points).label("total_points"))
+            .join(PointsLedger, User.id == PointsLedger.user_id)
             .group_by(User.id)
             .order_by(desc("total_points"))
             .limit(5)
