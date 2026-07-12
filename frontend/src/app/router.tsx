@@ -11,6 +11,7 @@ import { EnvironmentalPage } from "../features/environmental/pages/Environmental
 import { GovernancePage } from "../features/governance/pages/GovernancePage"
 import { SocialPage } from "../features/social/pages/SocialPage"
 import { GamificationPage } from "../features/gamification/pages/GamificationPage"
+import { ReportsPage } from "../features/reports/pages/ReportsPage"
 
 // Protected Route Wrapper
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -109,6 +110,10 @@ export const router = createBrowserRouter([
       {
         path: "gamification",
         element: <GamificationPage />,
+      },
+      {
+        path: "reports",
+        element: <ReportsPage />,
       },
       {
         path: "settings",

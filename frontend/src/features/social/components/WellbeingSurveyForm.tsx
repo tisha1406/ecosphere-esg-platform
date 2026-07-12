@@ -21,12 +21,13 @@ interface WellbeingSurveyFormProps {
 export function WellbeingSurveyForm({ onSuccess }: WellbeingSurveyFormProps) {
   const mutation = useCreateWellbeingMutation();
 
-  const form = useForm<WellbeingFormValues>({
+  const form = useForm<any>({
     resolver: zodResolver(wellbeingSchema),
     defaultValues: {
-      employee_id: "",
+      employee_id: "00000000-0000-0000-0000-000000000000",
       survey_date: new Date().toISOString().split("T")[0],
       satisfaction_score: 5,
+      comments: "",
     },
   });
 

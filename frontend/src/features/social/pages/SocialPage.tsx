@@ -109,7 +109,7 @@ export function SocialPage() {
       </div>
 
       {/* Tabs */}
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
+      <Tabs value={activeTab} onValueChange={setActiveTab} defaultValue="score" className="space-y-4">
         <TabsList className="bg-blue-50 dark:bg-blue-950/30">
           <TabsTrigger
             value="score"
