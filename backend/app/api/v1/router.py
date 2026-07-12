@@ -1,15 +1,15 @@
 from fastapi import APIRouter
-from app.api.v1 import auth, settings, environmental, social
+from app.api.v1 import auth, settings, environmental, social, governance
 
 api_router = APIRouter()
 api_router.include_router(auth.router)
 api_router.include_router(settings.router)
 api_router.include_router(environmental.router)
+api_router.include_router(governance.router)
 api_router.include_router(social.router)
 
 # Placeholder routers for subsequent modules:
 # Developer A (Tisha) stubs:
-# api_router.include_router(governance.router)
 # api_router.include_router(reports.router)
 
 # Developer B (Selin) stubs:

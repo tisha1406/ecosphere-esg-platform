@@ -3,6 +3,7 @@ from app.models.base import AuditMixin
 from app.models.user import User, UserRole
 from app.models.settings import CompanySetting
 from app.models.scoring import PointsLedger, EsgScoreSummary
+
 from app.models.environmental import (
     Company,
     Facility,
@@ -13,6 +14,7 @@ from app.models.environmental import (
     EnergyTypeEnum,
     WasteTypeEnum,
 )
+
 from app.models.social import (
     Department,
     Employee,
@@ -20,6 +22,13 @@ from app.models.social import (
     CsrInitiative,
     DiversityMetric,
     CsrStatusEnum,
+)
+
+from app.models.governance import (
+    Policy,
+    ComplianceAudit,
+    BoardActivity,
+    PolicyStatusEnum,
 )
 
 __all__ = [
@@ -44,4 +53,8 @@ __all__ = [
     "CsrInitiative",
     "DiversityMetric",
     "CsrStatusEnum",
+    "Policy",
+    "ComplianceAudit",
+    "BoardActivity",
+    "PolicyStatusEnum",
 ]
