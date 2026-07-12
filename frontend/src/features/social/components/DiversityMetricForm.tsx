@@ -31,9 +31,12 @@ export function DiversityMetricForm({ onSuccess }: DiversityMetricFormProps) {
     },
   });
 
-  const onSubmit = async (data: DiversityFormValues) => {
-    await mutation.mutateAsync(data);
-    onSuccess();
+  const onSubmit = (data: DiversityFormValues) => {
+    mutation.mutate(data, {
+      onSuccess: () => {
+        onSuccess();
+      }
+    });
   };
 
   return (

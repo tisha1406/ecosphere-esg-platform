@@ -21,12 +21,12 @@ export function AuditForm({ onSuccess }: { onSuccess: () => void }) {
     }
   });
 
-  const onSubmit = async (data: AuditFormValues) => {
-    if (data.auditor_id === "00000000-0000-0000-0000-000000000000") {
-      data.auditor_id = uuidv4(); 
-    }
-    await mutation.mutateAsync(data);
-    onSuccess();
+  const onSubmit = (data: AuditFormValues) => {
+    mutation.mutate(data, {
+      onSuccess: () => {
+        onSuccess();
+      }
+    });
   };
 
   return (

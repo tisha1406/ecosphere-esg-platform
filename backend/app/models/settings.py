@@ -21,3 +21,14 @@ class CompanySetting(Base, AuditMixin):
     # Notifications Preferences
     notification_email_alerts = Column(Boolean, nullable=False, default=True)
     notification_weekly_reports = Column(Boolean, nullable=False, default=True)
+
+    # Business Rules Toggles
+    auto_emission_calculation = Column(Boolean, default=True)
+    require_evidence_csr = Column(Boolean, default=True)
+    auto_award_badges = Column(Boolean, default=True)
+    email_alerts_compliance = Column(Boolean, default=True)
+
+    # Weights for ESG Score calculation (must sum to 100)
+    weight_environmental = Column(Float, default=40.0)
+    weight_social = Column(Float, default=30.0)
+    weight_governance = Column(Float, default=30.0)

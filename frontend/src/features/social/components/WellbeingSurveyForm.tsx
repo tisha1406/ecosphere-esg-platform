@@ -31,9 +31,12 @@ export function WellbeingSurveyForm({ onSuccess }: WellbeingSurveyFormProps) {
     },
   });
 
-  const onSubmit = async (data: WellbeingFormValues) => {
-    await mutation.mutateAsync(data);
-    onSuccess();
+  const onSubmit = (data: WellbeingFormValues) => {
+    mutation.mutate(data, {
+      onSuccess: () => {
+        onSuccess();
+      }
+    });
   };
 
   return (

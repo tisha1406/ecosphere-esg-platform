@@ -2,14 +2,23 @@ from app.core.database import Base
 from app.models.base import AuditMixin
 from app.models.user import User, UserRole
 from app.models.settings import CompanySetting
-from app.models.scoring import PointsLedger, EsgScoreSummary
-from app.models.gamification import Badge
+from app.models.scoring import PointsLedger, EsgScoreSummary, DepartmentScore
+from app.models.gamification import Badge, Reward, Challenge, ChallengeParticipation
 from app.models.notification import Notification
+
+from app.models.master import (
+    Department,
+    Category,
+    EmissionFactor,
+    ProductESGProfile,
+    EnvironmentalGoal
+)
 
 from app.models.environmental import (
     Company,
     Facility,
     CarbonEmission,
+    CarbonTransaction,
     EnergyUsage,
     WasteTracking,
     ScopeEnum,
@@ -18,17 +27,18 @@ from app.models.environmental import (
 )
 
 from app.models.social import (
-    Department,
-    Employee,
     EmployeeWellbeing,
-    CsrInitiative,
+    CSRActivity,
+    EmployeeParticipation,
     DiversityMetric,
     CsrStatusEnum,
 )
 
 from app.models.governance import (
     Policy,
-    ComplianceAudit,
+    PolicyAcknowledgement,
+    Audit,
+    ComplianceIssue,
     BoardActivity,
     PolicyStatusEnum,
 )
@@ -41,24 +51,30 @@ __all__ = [
     "CompanySetting",
     "PointsLedger",
     "EsgScoreSummary",
+    "DepartmentScore",
     "Badge",
+    "Reward",
+    "Challenge",
+    "ChallengeParticipation",
+    "Department",
+    "Category",
+    "EmissionFactor",
+    "ProductESGProfile",
+    "EnvironmentalGoal",
     "Company",
     "Facility",
     "CarbonEmission",
+    "CarbonTransaction",
     "EnergyUsage",
     "WasteTracking",
-    "ScopeEnum",
-    "EnergyTypeEnum",
-    "WasteTypeEnum",
-    "Department",
-    "Employee",
     "EmployeeWellbeing",
-    "CsrInitiative",
+    "CSRActivity",
+    "EmployeeParticipation",
     "DiversityMetric",
-    "CsrStatusEnum",
     "Policy",
-    "ComplianceAudit",
+    "PolicyAcknowledgement",
+    "Audit",
+    "ComplianceIssue",
     "BoardActivity",
-    "PolicyStatusEnum",
     "Notification",
 ]

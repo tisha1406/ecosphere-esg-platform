@@ -19,6 +19,7 @@ class GovernanceService:
 
     # --- Policy ---
     async def create_policy(self, obj_in: PolicyCreate, user_id: UUID) -> Policy:
+        obj_in.owner_id = user_id
         obj = await self.repo.create_policy(obj_in.model_dump())
         summary_before = await scoring_service.get_score_summary(self.db, "default")
         old_score = summary_before.total_score
@@ -55,6 +56,7 @@ class GovernanceService:
 
     # --- Compliance Audit ---
     async def create_compliance_audit(self, obj_in: ComplianceAuditCreate, user_id: UUID) -> ComplianceAudit:
+        obj_in.auditor_id = user_id
         obj = await self.repo.create_compliance_audit(obj_in.model_dump())
         summary_before = await scoring_service.get_score_summary(self.db, "default")
         old_score = summary_before.total_score

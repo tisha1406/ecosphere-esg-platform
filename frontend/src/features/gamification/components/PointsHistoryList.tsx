@@ -66,17 +66,6 @@ export function PointsHistoryList({ userId }: PointsHistoryListProps) {
 
   return (
     <div className="space-y-4">
-      {/* Total points summary banner */}
-      <div className="flex items-center justify-between p-4 rounded-xl bg-gradient-to-r from-primary/10 to-primary/5 border border-primary/20">
-        <div>
-          <p className="text-sm text-muted-foreground font-medium">Total Points Earned</p>
-          <p className="text-3xl font-bold text-primary tabular-nums">
-            {totalPoints.toLocaleString()}
-          </p>
-        </div>
-        <Trophy className="w-10 h-10 text-primary/40" />
-      </div>
-
       {/* History feed */}
       {history.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">

@@ -14,6 +14,13 @@ class CompanySettingCreate(BaseModel):
     medium_score_threshold: float = 70.0
     notification_email_alerts: bool = True
     notification_weekly_reports: bool = True
+    auto_emission_calculation: bool = True
+    require_evidence_csr: bool = True
+    auto_award_badges: bool = True
+    email_alerts_compliance: bool = True
+    weight_environmental: float = 40.0
+    weight_social: float = 30.0
+    weight_governance: float = 30.0
 
 class CompanySettingUpdate(BaseModel):
     company_name: Optional[str] = None
@@ -26,6 +33,13 @@ class CompanySettingUpdate(BaseModel):
     medium_score_threshold: Optional[float] = None
     notification_email_alerts: Optional[bool] = None
     notification_weekly_reports: Optional[bool] = None
+    auto_emission_calculation: Optional[bool] = None
+    require_evidence_csr: Optional[bool] = None
+    auto_award_badges: Optional[bool] = None
+    email_alerts_compliance: Optional[bool] = None
+    weight_environmental: Optional[float] = None
+    weight_social: Optional[float] = None
+    weight_governance: Optional[float] = None
 
 class CompanySettingRead(BaseModel):
     model_config = ConfigDict(from_attributes=True)
@@ -41,6 +55,13 @@ class CompanySettingRead(BaseModel):
     medium_score_threshold: float
     notification_email_alerts: bool
     notification_weekly_reports: bool
+    auto_emission_calculation: bool
+    require_evidence_csr: bool
+    auto_award_badges: bool
+    email_alerts_compliance: bool
+    weight_environmental: float
+    weight_social: float
+    weight_governance: float
     is_active: bool
     created_at: datetime
     updated_at: datetime

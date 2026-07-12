@@ -22,12 +22,12 @@ export function EnergyForm({ onSuccess }: { onSuccess: () => void }) {
     }
   });
 
-  const onSubmit = async (data: EnergyFormValues) => {
-    if (data.facility_id === "00000000-0000-0000-0000-000000000000") {
-      data.facility_id = uuidv4(); 
-    }
-    await mutation.mutateAsync(data);
-    onSuccess();
+  const onSubmit = (data: EnergyFormValues) => {
+    mutation.mutate(data, {
+      onSuccess: () => {
+        onSuccess();
+      }
+    });
   };
 
   return (

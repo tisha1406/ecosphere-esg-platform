@@ -1,19 +1,13 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { dashboardApi } from "../api";
-import { mockDashboardSummary } from "../mock";
-
-const demoNotifications = mockDashboardSummary.recent_notifications;
 
 // ── Dashboard Summary ──────────────────────────────────────────────────────────
-// Fires all backend sub-queries in parallel (asyncio.gather on server side).
-// No sequential waterfall on the client either — single API call.
 export const useDashboardSummary = (company_id: string = "default") =>
   useQuery({
     queryKey: ["dashboardSummary", company_id],
-    queryFn: async () => ({ data: { data: mockDashboardSummary } }),
-    initialData: { data: { data: mockDashboardSummary } },
-    staleTime: Infinity,
+    queryFn: () => dashboardApi.getSummary(company_id),
+    staleTime: 30_000,
   });
 
 // ── Notifications ──────────────────────────────────────────────────────────────
@@ -24,68 +18,22 @@ export const useNotificationsQuery = (params?: {
 }) =>
   useQuery({
     queryKey: ["notifications", params],
-    queryFn: async () => ({
-      data: {
-        data: {
-          items: typeof params?.is_read === "boolean"
-            ? demoNotifications.filter((item) => item.is_read === params.is_read)
-            : demoNotifications,
-          total: typeof params?.is_read === "boolean"
-            ? demoNotifications.filter((item) => item.is_read === params.is_read).length
-            : demoNotifications.length,
-          page: params?.page ?? 1,
-          page_size: params?.page_size ?? demoNotifications.length,
-        },
-      },
-    }),
-    initialData: {
-      data: {
-        data: {
-          items: typeof params?.is_read === "boolean"
-            ? demoNotifications.filter((item) => item.is_read === params.is_read)
-            : demoNotifications,
-          total: typeof params?.is_read === "boolean"
-            ? demoNotifications.filter((item) => item.is_read === params.is_read).length
-            : demoNotifications.length,
-          page: params?.page ?? 1,
-          page_size: params?.page_size ?? demoNotifications.length,
-        },
-      },
-    },
-    staleTime: Infinity,
+    queryFn: () => dashboardApi.getNotifications(params),
+    staleTime: 30_000,
   });
 
 export const useUnreadCountQuery = () =>
   useQuery({
     queryKey: ["notificationsUnread"],
-    queryFn: async () => ({
-      data: {
-        data: {
-          items: demoNotifications.filter((item) => !item.is_read),
-          total: demoNotifications.filter((item) => !item.is_read).length,
-          page: 1,
-          page_size: 1,
-        },
-      },
-    }),
-    initialData: {
-      data: {
-        data: {
-          items: demoNotifications.filter((item) => !item.is_read),
-          total: demoNotifications.filter((item) => !item.is_read).length,
-          page: 1,
-          page_size: 1,
-        },
-      },
-    },
-    staleTime: Infinity,
-    select: (res) => (res.data?.data?.total as number) ?? 0,
+    queryFn: () => dashboardApi.getNotifications({ page: 1, page_size: 100, is_read: false }),
+    staleTime: 30_000,
+    select: (res: any) => res?.data?.total ?? 0,
   });
 
 export const useMarkNotificationReadMutation = () => {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (_id: string) => ({ ok: true }),
+    mutationFn: async (id: string) => dashboardApi.markNotificationRead(id),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["notifications"] });
       qc.invalidateQueries({ queryKey: ["notificationsUnread"] });
@@ -98,7 +46,7 @@ export const useMarkNotificationReadMutation = () => {
 export const useMarkAllNotificationsReadMutation = () => {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async () => ({ ok: true }),
+    mutationFn: async () => dashboardApi.markAllNotificationsRead(),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["notifications"] });
       qc.invalidateQueries({ queryKey: ["notificationsUnread"] });

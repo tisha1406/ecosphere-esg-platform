@@ -220,6 +220,120 @@ async def delete_board_activity(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Board activity not found")
     return ResponseEnvelope(data={"deleted": True})
 
+from app.models.governance import PolicyAcknowledgement, ComplianceIssue
+from app.schemas.governance import (
+    PolicyAcknowledgementCreate, PolicyAcknowledgementUpdate, PolicyAcknowledgementRead,
+    ComplianceIssueCreate, ComplianceIssueUpdate, ComplianceIssueRead
+)
+from typing import List
+from sqlalchemy import select
+
+# --- Policy Acknowledgements ---
+@router.post("/policy-acknowledgements", response_model=ResponseEnvelope[PolicyAcknowledgementRead], status_code=status.HTTP_201_CREATED)
+async def create_policy_acknowledgement(data: PolicyAcknowledgementCreate, db: AsyncSession = Depends(get_db), current_user: User = Depends(require_role(*write_roles))):
+    db_obj = PolicyAcknowledgement(**data.model_dump())
+    db.add(db_obj)
+    await db.commit()
+    await db.refresh(db_obj)
+    return ResponseEnvelope(data=PolicyAcknowledgementRead.model_validate(db_obj))
+
+@router.get("/policy-acknowledgements", response_model=ResponseEnvelope[List[PolicyAcknowledgementRead]])
+async def list_policy_acknowledgements(db: AsyncSession = Depends(get_db), current_user: User = Depends(require_role(*read_roles))):
+    result = await db.execute(select(PolicyAcknowledgement))
+    items = result.scalars().all()
+    return ResponseEnvelope(data=[PolicyAcknowledgementRead.model_validate(i) for i in items])
+
+@router.get("/policy-acknowledgements/{id}", response_model=ResponseEnvelope[PolicyAcknowledgementRead])
+async def get_policy_acknowledgement(id: UUID, db: AsyncSession = Depends(get_db), current_user: User = Depends(require_role(*read_roles))):
+    db_obj = await db.get(PolicyAcknowledgement, id)
+    if not db_obj:
+        raise HTTPException(status_code=404, detail="Acknowledgement not found")
+    return ResponseEnvelope(data=PolicyAcknowledgementRead.model_validate(db_obj))
+
+@router.patch("/policy-acknowledgements/{id}", response_model=ResponseEnvelope[PolicyAcknowledgementRead])
+async def update_policy_acknowledgement(id: UUID, data: PolicyAcknowledgementUpdate, db: AsyncSession = Depends(get_db), current_user: User = Depends(require_role(*write_roles))):
+    db_obj = await db.get(PolicyAcknowledgement, id)
+    if not db_obj:
+        raise HTTPException(status_code=404, detail="Acknowledgement not found")
+    for key, value in data.model_dump(exclude_unset=True).items():
+        setattr(db_obj, key, value)
+    await db.commit()
+    await db.refresh(db_obj)
+    return ResponseEnvelope(data=PolicyAcknowledgementRead.model_validate(db_obj))
+
+@router.delete("/policy-acknowledgements/{id}", response_model=ResponseEnvelope[dict])
+async def delete_policy_acknowledgement(id: UUID, db: AsyncSession = Depends(get_db), current_user: User = Depends(require_role(*write_roles))):
+    db_obj = await db.get(PolicyAcknowledgement, id)
+    if not db_obj:
+        raise HTTPException(status_code=404, detail="Acknowledgement not found")
+    await db.delete(db_obj)
+    await db.commit()
+    return ResponseEnvelope(data={"deleted": True})
+
+# --- Compliance Issues ---
+@router.post("/compliance-issues", response_model=ResponseEnvelope[ComplianceIssueRead], status_code=status.HTTP_201_CREATED)
+async def create_compliance_issue(data: ComplianceIssueCreate, db: AsyncSession = Depends(get_db), current_user: User = Depends(require_role(*write_roles))):
+    from app.models.settings import CompanySetting
+    from app.models.notification import Notification
+    from sqlalchemy import select
+    
+    db_obj = ComplianceIssue(**data.model_dump())
+    db.add(db_obj)
+    await db.commit()
+    await db.refresh(db_obj)
+    
+    # Rule 4: Trigger Notification on ComplianceIssue create if settings allow
+    result = await db.execute(select(CompanySetting).limit(1))
+    settings = result.scalars().first()
+    
+    if settings and getattr(settings, 'notification_email_alerts', False):
+        # We notify the admin user
+        admin_result = await db.execute(select(User).where(User.role == UserRole.admin).limit(1))
+        admin = admin_result.scalars().first()
+        if admin:
+            notif = Notification(
+                user_id=admin.id,
+                message=f"New Compliance Issue created: {db_obj.title} (Severity: {db_obj.severity})",
+                is_read=False
+            )
+            db.add(notif)
+            await db.commit()
+            
+    return ResponseEnvelope(data=ComplianceIssueRead.model_validate(db_obj))
+
+@router.get("/compliance-issues", response_model=ResponseEnvelope[List[ComplianceIssueRead]])
+async def list_compliance_issues(db: AsyncSession = Depends(get_db), current_user: User = Depends(require_role(*read_roles))):
+    result = await db.execute(select(ComplianceIssue))
+    items = result.scalars().all()
+    return ResponseEnvelope(data=[ComplianceIssueRead.model_validate(i) for i in items])
+
+@router.get("/compliance-issues/{id}", response_model=ResponseEnvelope[ComplianceIssueRead])
+async def get_compliance_issue(id: UUID, db: AsyncSession = Depends(get_db), current_user: User = Depends(require_role(*read_roles))):
+    db_obj = await db.get(ComplianceIssue, id)
+    if not db_obj:
+        raise HTTPException(status_code=404, detail="Issue not found")
+    return ResponseEnvelope(data=ComplianceIssueRead.model_validate(db_obj))
+
+@router.patch("/compliance-issues/{id}", response_model=ResponseEnvelope[ComplianceIssueRead])
+async def update_compliance_issue(id: UUID, data: ComplianceIssueUpdate, db: AsyncSession = Depends(get_db), current_user: User = Depends(require_role(*write_roles))):
+    db_obj = await db.get(ComplianceIssue, id)
+    if not db_obj:
+        raise HTTPException(status_code=404, detail="Issue not found")
+    for key, value in data.model_dump(exclude_unset=True).items():
+        setattr(db_obj, key, value)
+    await db.commit()
+    await db.refresh(db_obj)
+    return ResponseEnvelope(data=ComplianceIssueRead.model_validate(db_obj))
+
+@router.delete("/compliance-issues/{id}", response_model=ResponseEnvelope[dict])
+async def delete_compliance_issue(id: UUID, db: AsyncSession = Depends(get_db), current_user: User = Depends(require_role(*write_roles))):
+    db_obj = await db.get(ComplianceIssue, id)
+    if not db_obj:
+        raise HTTPException(status_code=404, detail="Issue not found")
+    await db.delete(db_obj)
+    await db.commit()
+    return ResponseEnvelope(data={"deleted": True})
+
 # --- Score ---
 @router.get("/score", response_model=ResponseEnvelope[float])
 async def get_governance_score(

@@ -3,35 +3,7 @@ from decimal import Decimal
 from typing import Optional
 from uuid import UUID
 from pydantic import BaseModel, ConfigDict, Field
-from app.models.social import CsrStatusEnum
-
-
-# --- Department ---
-class DepartmentBase(BaseModel):
-    name: str = Field(..., min_length=1, max_length=255)
-    company_id: str = Field(..., min_length=1)
-
-class DepartmentCreate(DepartmentBase):
-    pass
-
-class DepartmentRead(DepartmentBase):
-    id: UUID
-    model_config = ConfigDict(from_attributes=True)
-
-
-# --- Employee ---
-class EmployeeBase(BaseModel):
-    full_name: str = Field(..., min_length=1, max_length=255)
-    department_id: Optional[UUID] = None
-    company_id: str = Field(..., min_length=1)
-
-class EmployeeCreate(EmployeeBase):
-    pass
-
-class EmployeeRead(EmployeeBase):
-    id: UUID
-    model_config = ConfigDict(from_attributes=True)
-
+from app.models.social import CsrStatusEnum, EmployeeParticipationApprovalEnum
 
 # --- EmployeeWellbeing ---
 class WellbeingBase(BaseModel):
@@ -53,32 +25,58 @@ class WellbeingRead(WellbeingBase):
     model_config = ConfigDict(from_attributes=True)
 
 
-# --- CsrInitiative ---
+# --- CSRActivity ---
 class CsrBase(BaseModel):
-    name: str = Field(..., min_length=1, max_length=255)
-    budget: Decimal = Field(..., ge=0)
-    beneficiaries: int = Field(..., ge=0)
+    title: str = Field(..., min_length=1, max_length=255)
+    description: Optional[str] = None
+    category_id: UUID
+    icon: Optional[str] = None
+    evidence_required: bool = False
     status: CsrStatusEnum = CsrStatusEnum.planned
+    department_id: UUID
     start_date: date
     end_date: Optional[date] = None
-    responsible_id: Optional[UUID] = None
 
 class CsrCreate(CsrBase):
     pass
 
 class CsrUpdate(BaseModel):
-    name: Optional[str] = Field(None, min_length=1, max_length=255)
-    budget: Optional[Decimal] = Field(None, ge=0)
-    beneficiaries: Optional[int] = Field(None, ge=0)
+    title: Optional[str] = None
+    description: Optional[str] = None
+    category_id: Optional[UUID] = None
+    icon: Optional[str] = None
+    evidence_required: Optional[bool] = None
     status: Optional[CsrStatusEnum] = None
+    department_id: Optional[UUID] = None
     start_date: Optional[date] = None
     end_date: Optional[date] = None
-    responsible_id: Optional[UUID] = None
 
 class CsrRead(CsrBase):
     id: UUID
     is_active: bool
     created_at: date
+    model_config = ConfigDict(from_attributes=True)
+
+
+# --- EmployeeParticipation ---
+class EmployeeParticipationBase(BaseModel):
+    employee_id: UUID
+    activity_id: UUID
+    proof: Optional[str] = None
+    approval_status: EmployeeParticipationApprovalEnum = EmployeeParticipationApprovalEnum.pending
+    points_earned: int = 0
+    completion_date: date
+
+class EmployeeParticipationCreate(EmployeeParticipationBase):
+    pass
+
+class EmployeeParticipationUpdate(BaseModel):
+    proof: Optional[str] = None
+    approval_status: Optional[EmployeeParticipationApprovalEnum] = None
+    points_earned: Optional[int] = None
+
+class EmployeeParticipationRead(EmployeeParticipationBase):
+    id: UUID
     model_config = ConfigDict(from_attributes=True)
 
 

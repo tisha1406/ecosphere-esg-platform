@@ -310,3 +310,46 @@ async def reset_password(
 @router.get("/me", response_model=ResponseEnvelope[UserRead])
 async def me(current_user: User = Depends(get_current_user)):
     return ResponseEnvelope(success=True, data=current_user, message="Profile retrieved")
+
+from typing import List
+from uuid import UUID
+from pydantic import BaseModel
+
+class UserUpdate(BaseModel):
+    role: UserRole = None
+    is_active: bool = None
+
+@router.get("/users", response_model=ResponseEnvelope[List[UserRead]])
+async def list_users(
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    if current_user.role != UserRole.admin:
+        raise HTTPException(status_code=403, detail="Not authorized")
+    result = await db.execute(select(User))
+    users = result.scalars().all()
+    return ResponseEnvelope(success=True, data=[UserRead.model_validate(u) for u in users])
+
+@router.patch("/users/{user_id}", response_model=ResponseEnvelope[UserRead])
+async def update_user(
+    user_id: UUID,
+    user_update: UserUpdate,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    if current_user.role != UserRole.admin:
+        raise HTTPException(status_code=403, detail="Not authorized")
+    
+    result = await db.execute(select(User).where(User.id == user_id))
+    user = result.scalars().first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+        
+    if user_update.role is not None:
+        user.role = user_update.role
+    if user_update.is_active is not None:
+        user.is_active = user_update.is_active
+        
+    await db.commit()
+    await db.refresh(user)
+    return ResponseEnvelope(success=True, data=UserRead.model_validate(user))

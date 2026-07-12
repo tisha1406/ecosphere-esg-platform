@@ -109,3 +109,177 @@ async def award_points(
         source_id=uuid.uuid4(),
     )
     return ResponseEnvelope(data={"awarded": True})
+
+from app.models.gamification import Challenge, ChallengeParticipation, Reward
+from app.schemas.gamification import (
+    ChallengeCreate, ChallengeUpdate, ChallengeRead,
+    ChallengeParticipationCreate, ChallengeParticipationUpdate, ChallengeParticipationRead,
+    RewardCreate, RewardUpdate, RewardRead
+)
+from sqlalchemy import select
+from typing import List
+
+# --- Challenges ---
+@router.post("/challenges", response_model=ResponseEnvelope[ChallengeRead], status_code=status.HTTP_201_CREATED)
+async def create_challenge(data: ChallengeCreate, db: AsyncSession = Depends(get_db), current_user: User = Depends(require_role(*write_roles))):
+    db_obj = Challenge(**data.model_dump())
+    db.add(db_obj)
+    await db.commit()
+    await db.refresh(db_obj)
+    return ResponseEnvelope(data=ChallengeRead.model_validate(db_obj))
+
+@router.get("/challenges", response_model=ResponseEnvelope[List[ChallengeRead]])
+async def list_challenges(db: AsyncSession = Depends(get_db), current_user: User = Depends(require_role(*read_roles))):
+    result = await db.execute(select(Challenge))
+    items = result.scalars().all()
+    return ResponseEnvelope(data=[ChallengeRead.model_validate(i) for i in items])
+
+@router.get("/challenges/{id}", response_model=ResponseEnvelope[ChallengeRead])
+async def get_challenge(id: UUID, db: AsyncSession = Depends(get_db), current_user: User = Depends(require_role(*read_roles))):
+    db_obj = await db.get(Challenge, id)
+    if not db_obj:
+        raise HTTPException(status_code=404, detail="Challenge not found")
+    return ResponseEnvelope(data=ChallengeRead.model_validate(db_obj))
+
+@router.patch("/challenges/{id}", response_model=ResponseEnvelope[ChallengeRead])
+async def update_challenge(id: UUID, data: ChallengeUpdate, db: AsyncSession = Depends(get_db), current_user: User = Depends(require_role(*write_roles))):
+    db_obj = await db.get(Challenge, id)
+    if not db_obj:
+        raise HTTPException(status_code=404, detail="Challenge not found")
+    for key, value in data.model_dump(exclude_unset=True).items():
+        setattr(db_obj, key, value)
+    await db.commit()
+    await db.refresh(db_obj)
+    return ResponseEnvelope(data=ChallengeRead.model_validate(db_obj))
+
+@router.delete("/challenges/{id}", response_model=ResponseEnvelope[dict])
+async def delete_challenge(id: UUID, db: AsyncSession = Depends(get_db), current_user: User = Depends(require_role(*write_roles))):
+    db_obj = await db.get(Challenge, id)
+    if not db_obj:
+        raise HTTPException(status_code=404, detail="Challenge not found")
+    await db.delete(db_obj)
+    await db.commit()
+    return ResponseEnvelope(data={"deleted": True})
+
+# --- Challenge Participations ---
+@router.post("/challenge-participations", response_model=ResponseEnvelope[ChallengeParticipationRead], status_code=status.HTTP_201_CREATED)
+async def create_challenge_participation(data: ChallengeParticipationCreate, db: AsyncSession = Depends(get_db), current_user: User = Depends(require_role(*write_roles))):
+    db_obj = ChallengeParticipation(**data.model_dump())
+    db.add(db_obj)
+    await db.commit()
+    await db.refresh(db_obj)
+    return ResponseEnvelope(data=ChallengeParticipationRead.model_validate(db_obj))
+
+@router.get("/challenge-participations", response_model=ResponseEnvelope[List[ChallengeParticipationRead]])
+async def list_challenge_participations(db: AsyncSession = Depends(get_db), current_user: User = Depends(require_role(*read_roles))):
+    result = await db.execute(select(ChallengeParticipation))
+    items = result.scalars().all()
+    return ResponseEnvelope(data=[ChallengeParticipationRead.model_validate(i) for i in items])
+
+@router.get("/challenge-participations/{id}", response_model=ResponseEnvelope[ChallengeParticipationRead])
+async def get_challenge_participation(id: UUID, db: AsyncSession = Depends(get_db), current_user: User = Depends(require_role(*read_roles))):
+    db_obj = await db.get(ChallengeParticipation, id)
+    if not db_obj:
+        raise HTTPException(status_code=404, detail="Participation not found")
+    return ResponseEnvelope(data=ChallengeParticipationRead.model_validate(db_obj))
+
+@router.patch("/challenge-participations/{id}", response_model=ResponseEnvelope[ChallengeParticipationRead])
+async def update_challenge_participation(id: UUID, data: ChallengeParticipationUpdate, db: AsyncSession = Depends(get_db), current_user: User = Depends(require_role(*write_roles))):
+    db_obj = await db.get(ChallengeParticipation, id)
+    if not db_obj:
+        raise HTTPException(status_code=404, detail="Participation not found")
+    for key, value in data.model_dump(exclude_unset=True).items():
+        setattr(db_obj, key, value)
+    await db.commit()
+    await db.refresh(db_obj)
+    return ResponseEnvelope(data=ChallengeParticipationRead.model_validate(db_obj))
+
+@router.delete("/challenge-participations/{id}", response_model=ResponseEnvelope[dict])
+async def delete_challenge_participation(id: UUID, db: AsyncSession = Depends(get_db), current_user: User = Depends(require_role(*write_roles))):
+    db_obj = await db.get(ChallengeParticipation, id)
+    if not db_obj:
+        raise HTTPException(status_code=404, detail="Participation not found")
+    await db.delete(db_obj)
+    await db.commit()
+    return ResponseEnvelope(data={"deleted": True})
+
+# --- Rewards ---
+@router.post("/rewards", response_model=ResponseEnvelope[RewardRead], status_code=status.HTTP_201_CREATED)
+async def create_reward(data: RewardCreate, db: AsyncSession = Depends(get_db), current_user: User = Depends(require_role(*write_roles))):
+    db_obj = Reward(**data.model_dump())
+    db.add(db_obj)
+    await db.commit()
+    await db.refresh(db_obj)
+    return ResponseEnvelope(data=RewardRead.model_validate(db_obj))
+
+@router.get("/rewards", response_model=ResponseEnvelope[List[RewardRead]])
+async def list_rewards(db: AsyncSession = Depends(get_db), current_user: User = Depends(require_role(*read_roles))):
+    result = await db.execute(select(Reward))
+    items = result.scalars().all()
+    return ResponseEnvelope(data=[RewardRead.model_validate(i) for i in items])
+
+@router.get("/rewards/{id}", response_model=ResponseEnvelope[RewardRead])
+async def get_reward(id: UUID, db: AsyncSession = Depends(get_db), current_user: User = Depends(require_role(*read_roles))):
+    db_obj = await db.get(Reward, id)
+    if not db_obj:
+        raise HTTPException(status_code=404, detail="Reward not found")
+    return ResponseEnvelope(data=RewardRead.model_validate(db_obj))
+
+@router.patch("/rewards/{id}", response_model=ResponseEnvelope[RewardRead])
+async def update_reward(id: UUID, data: RewardUpdate, db: AsyncSession = Depends(get_db), current_user: User = Depends(require_role(*write_roles))):
+    db_obj = await db.get(Reward, id)
+    if not db_obj:
+        raise HTTPException(status_code=404, detail="Reward not found")
+    for key, value in data.model_dump(exclude_unset=True).items():
+        setattr(db_obj, key, value)
+    await db.commit()
+    await db.refresh(db_obj)
+    return ResponseEnvelope(data=RewardRead.model_validate(db_obj))
+
+@router.delete("/rewards/{id}", response_model=ResponseEnvelope[dict])
+async def delete_reward(id: UUID, db: AsyncSession = Depends(get_db), current_user: User = Depends(require_role(*write_roles))):
+    db_obj = await db.get(Reward, id)
+    if not db_obj:
+        raise HTTPException(status_code=404, detail="Reward not found")
+    await db.delete(db_obj)
+    await db.commit()
+    return ResponseEnvelope(data={"deleted": True})
+
+from app.schemas.gamification import RedeemRewardRequest
+
+@router.post("/rewards/redeem", response_model=ResponseEnvelope[dict])
+async def redeem_reward(
+    data: RedeemRewardRequest, 
+    db: AsyncSession = Depends(get_db), 
+    current_user: User = Depends(require_role(*read_roles)),
+    service: GamificationService = Depends(get_service)
+):
+    reward = await db.get(Reward, data.reward_id)
+    if not reward:
+        raise HTTPException(status_code=404, detail="Reward not found")
+    
+    if reward.stock <= 0:
+        raise HTTPException(status_code=400, detail="Reward is out of stock")
+        
+    # Check user points
+    user_points = await service.repo.get_user_points_total(current_user.id)
+    if user_points < reward.points_required:
+        raise HTTPException(status_code=400, detail="Insufficient points to redeem this reward")
+        
+    # Deduct points and decrease stock atomically
+    reward.stock -= 1
+    
+    # Actually award negative points
+    from app.models.scoring import PointsLedger
+    import uuid
+    db_obj = PointsLedger(
+        user_id=current_user.id,
+        points=-reward.points_required,
+        reason=f"Redeemed reward: {reward.name}",
+        source_table="rewards",
+        source_id=reward.id
+    )
+    db.add(db_obj)
+    await db.commit()
+    
+    return ResponseEnvelope(data={"redeemed": True, "reward": reward.name, "points_deducted": reward.points_required})
